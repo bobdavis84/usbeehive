@@ -7,6 +7,12 @@ release version change is part of this delivery.
 
 ## Acceptance-criteria evidence matrix (28/28)
 
+All 28 criteria below are implemented by integration commit
+[`6eeb93a1038f4e90eaf341073fb37fb56dc1fd0d`](https://github.com/bobdavis84/usbeehive/commit/6eeb93a1038f4e90eaf341073fb37fb56dc1fd0d).
+That commit also includes the sanitized mock exports, standalone DeviceCard,
+expanded CI, and final regression fixes. M1/M2 references below identify the
+inherited implementation history, not separate publication requirements.
+
 | Req. | Acceptance criterion | Implementation/evidence | Status |
 |---|---|---|---|
 | R1 | Schema document exists | `docs/SCHEMA.md`, `docs/schema-types.json` | Met |
