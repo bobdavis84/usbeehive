@@ -1,0 +1,2332 @@
+[
+  {
+    "category": "TypeCPort",
+    "device_class": "Unknown",
+    "device_subclass": "",
+    "status": "Empty",
+    "headline": "USB-C Port 0",
+    "subtitle": "Nothing connected",
+    "icon": "plug",
+    "vendor": "",
+    "product": "",
+    "vendor_id": 0,
+    "product_id": 0,
+    "primary_driver": "",
+    "properties": [],
+    "link_speed_mbps": 0,
+    "usb_version": "",
+    "power": {
+      "power_in_mw": 0,
+      "power_out_mw": 0,
+      "contract_mw": 0,
+      "power_role": "Unknown"
+    },
+    "charging_diag": null,
+    "data_rate": null,
+    "usb_device": null,
+    "typec_port": {
+      "sysfs_path": "/sys/mock-device",
+      "port_name": "port0",
+      "port_number": 0,
+      "data_role": "[host] device",
+      "power_role": "[source]",
+      "port_type": "",
+      "power_op_mode": "default",
+      "orientation": "",
+      "pd_revision": "2.0",
+      "usb_typec_rev": "1.1",
+      "power_supply": {
+        "sysfs_path": "/sys/mock-device",
+        "name": "ucsi-source-psy-USBC000:001",
+        "online": false,
+        "voltage_now_uv": 0,
+        "current_now_ua": 0,
+        "current_max_ua": 0,
+        "voltage_min_uv": 0,
+        "voltage_max_uv": 0,
+        "charge_type": "N/A",
+        "usb_type": "[C] PD PD_PPS",
+        "raw_attributes": {
+          "charge_type": "N/A",
+          "current_max": "0",
+          "current_now": "0",
+          "online": "0",
+          "scope": "Device",
+          "status": "Not charging",
+          "type": "USB",
+          "uevent": "DEVTYPE=power_supply\nPOWER_SUPPLY_NAME=ucsi-source-psy-USBC000:001\nPOWER_SUPPLY_TYPE=USB\nPOWER_SUPPLY_STATUS=Not charging\nPOWER_SUPPLY_CHARGE_TYPE=N/A\nPOWER_SUPPLY_ONLINE=0\nPOWER_SUPPLY_VOLTAGE_MAX=0\nPOWER_SUPPLY_VOLTAGE_MIN=0\nPOWER_SUPPLY_VOLTAGE_NOW=0\nPOWER_SUPPLY_CURRENT_MAX=0\nPOWER_SUPPLY_CURRENT_NOW=0\nPOWER_SUPPLY_TYPE=USB\nPOWER_SUPPLY_USB_TYPE=[C] PD PD_PPS\nPOWER_SUPPLY_SCOPE=Device",
+          "usb_type": "[C] PD PD_PPS",
+          "voltage_max": "0",
+          "voltage_min": "0",
+          "voltage_now": "0",
+          "waiting_for_supplier": "0"
+        }
+      },
+      "partner": null,
+      "cable": null,
+      "raw_attributes": {
+        "data_role": "[host] device",
+        "power_operation_mode": "default",
+        "power_role": "[source]",
+        "supported_accessory_modes": "none",
+        "uevent": "DEVTYPE=typec_port\nTYPEC_PORT=port0",
+        "usb_power_delivery_revision": "2.0",
+        "usb_typec_revision": "1.1",
+        "vconn_source": "yes",
+        "waiting_for_supplier": "0"
+      }
+    },
+    "power_delivery": null,
+    "cable": null
+  },
+  {
+    "category": "TypeCPort",
+    "device_class": "Unknown",
+    "device_subclass": "",
+    "status": "Sourcing",
+    "headline": "USB-C Port 1",
+    "subtitle": "Device connected",
+    "icon": "plug",
+    "vendor": "",
+    "product": "",
+    "vendor_id": 0,
+    "product_id": 0,
+    "primary_driver": "",
+    "properties": [
+      [
+        "data_role",
+        "host"
+      ],
+      [
+        "power_mode",
+        "default"
+      ],
+      [
+        "pd_revision",
+        "2.0"
+      ],
+      [
+        "altmode.reported",
+        "none"
+      ]
+    ],
+    "link_speed_mbps": 0,
+    "usb_version": "",
+    "power": {
+      "power_in_mw": 0,
+      "power_out_mw": 0,
+      "contract_mw": 0,
+      "power_role": "Source"
+    },
+    "charging_diag": null,
+    "data_rate": null,
+    "usb_device": null,
+    "typec_port": {
+      "sysfs_path": "/sys/mock-device",
+      "port_name": "port1",
+      "port_number": 1,
+      "data_role": "[host] device",
+      "power_role": "[source]",
+      "port_type": "",
+      "power_op_mode": "default",
+      "orientation": "",
+      "pd_revision": "2.0",
+      "usb_typec_rev": "1.1",
+      "power_supply": {
+        "sysfs_path": "/sys/mock-device",
+        "name": "ucsi-source-psy-USBC000:002",
+        "online": false,
+        "voltage_now_uv": 0,
+        "current_now_ua": 0,
+        "current_max_ua": 0,
+        "voltage_min_uv": 0,
+        "voltage_max_uv": 0,
+        "charge_type": "Unknown",
+        "usb_type": "C [PD] PD_PPS",
+        "raw_attributes": {
+          "charge_type": "Unknown",
+          "current_max": "0",
+          "current_now": "0",
+          "online": "0",
+          "scope": "Device",
+          "status": "Discharging",
+          "type": "USB",
+          "uevent": "DEVTYPE=power_supply\nPOWER_SUPPLY_NAME=ucsi-source-psy-USBC000:002\nPOWER_SUPPLY_TYPE=USB\nPOWER_SUPPLY_STATUS=Discharging\nPOWER_SUPPLY_CHARGE_TYPE=Unknown\nPOWER_SUPPLY_ONLINE=0\nPOWER_SUPPLY_VOLTAGE_MAX=0\nPOWER_SUPPLY_VOLTAGE_MIN=0\nPOWER_SUPPLY_VOLTAGE_NOW=0\nPOWER_SUPPLY_CURRENT_MAX=0\nPOWER_SUPPLY_CURRENT_NOW=0\nPOWER_SUPPLY_TYPE=USB\nPOWER_SUPPLY_USB_TYPE=C [PD] PD_PPS\nPOWER_SUPPLY_SCOPE=Device",
+          "usb_type": "C [PD] PD_PPS",
+          "voltage_max": "0",
+          "voltage_min": "0",
+          "voltage_now": "0",
+          "waiting_for_supplier": "0"
+        }
+      },
+      "partner": {
+        "type": "",
+        "pd_name": "pd2",
+        "usb_name": "",
+        "identity": null,
+        "altmodes": [],
+        "raw_attributes": {
+          "accessory_mode": "none",
+          "supports_usb_power_delivery": "yes",
+          "uevent": "DEVTYPE=typec_partner",
+          "usb_power_delivery_revision": "0.0"
+        }
+      },
+      "cable": null,
+      "raw_attributes": {
+        "data_role": "[host] device",
+        "power_operation_mode": "default",
+        "power_role": "[source]",
+        "supported_accessory_modes": "none",
+        "uevent": "DEVTYPE=typec_port\nTYPEC_PORT=port1",
+        "usb_power_delivery_revision": "2.0",
+        "usb_typec_revision": "1.1",
+        "vconn_source": "yes",
+        "waiting_for_supplier": "0"
+      }
+    },
+    "power_delivery": null,
+    "cable": null
+  },
+  {
+    "category": "Hub",
+    "device_class": "Hub",
+    "device_subclass": "",
+    "status": "Connected",
+    "headline": "USB2.0 Hub",
+    "subtitle": "VIA Labs · Hub",
+    "icon": "network-wired",
+    "vendor": "VIA Labs, Inc.",
+    "product": "USB2.0 Hub",
+    "vendor_id": 8457,
+    "product_id": 10263,
+    "primary_driver": "hub",
+    "properties": [
+      [
+        "mount",
+        "removable"
+      ],
+      [
+        "transport.usb2",
+        "true"
+      ],
+      [
+        "usb_bos_container_id",
+        "00000000-0000-0000-0000-000000000000"
+      ],
+      [
+        "usb_capable_speed_mbps",
+        "5000"
+      ],
+      [
+        "usb_capable_speed",
+        "SuperSpeed 5 Gbps"
+      ],
+      [
+        "usb_functional_floor_mbps",
+        "12"
+      ],
+      [
+        "usb_link_verdict",
+        "BelowCapability"
+      ],
+      [
+        "port.id",
+        "usb3-port1"
+      ],
+      [
+        "port.connect_type",
+        "hotplug"
+      ],
+      [
+        "hub.ports_total",
+        "4"
+      ],
+      [
+        "hub.ports_used",
+        "4"
+      ],
+      [
+        "power.source",
+        "self"
+      ],
+      [
+        "hub.power_committed_ma",
+        "950"
+      ],
+      [
+        "kernel.quirks",
+        "NO_LPM"
+      ]
+    ],
+    "link_speed_mbps": 480,
+    "usb_version": "2.1",
+    "power": {
+      "power_in_mw": 0,
+      "power_out_mw": 0,
+      "contract_mw": 0,
+      "power_role": "Unknown"
+    },
+    "charging_diag": null,
+    "data_rate": {
+      "verdict": "BelowCapability",
+      "negotiated_mbps": 480,
+      "capable_mbps": 5000,
+      "functional_floor_mbps": 12,
+      "capable_gen": "",
+      "summary": "Linked at 480 Mbps of an advertised 5 Gbps",
+      "detail": "Vendor declares full functionality from 12 Mbps — not a fault",
+      "is_warning": false
+    },
+    "usb_device": {
+      "sysfs_path": "/sys/mock-device",
+      "bus_port": "3-1",
+      "vendor_id": 8457,
+      "product_id": 10263,
+      "manufacturer": "VIA Labs, Inc.",
+      "product": "USB2.0 Hub",
+      "serial": "",
+      "version": "2.10",
+      "speed": 480,
+      "max_power_ma": 0,
+      "device_class": 9,
+      "device_sub_class": 0,
+      "device_protocol": 2,
+      "bus_num": 3,
+      "dev_num": 10,
+      "rx_lanes": 1,
+      "tx_lanes": 1,
+      "removable": "removable",
+      "num_interfaces": 1,
+      "num_configurations": 1,
+      "interfaces": [
+        {
+          "number": 0,
+          "class_code": 9,
+          "sub_class": 0,
+          "protocol": 2,
+          "driver": "hub"
+        }
+      ],
+      "children": [
+        {
+          "sysfs_path": "/sys/mock-device",
+          "bus_port": "3-1.1",
+          "vendor_id": 1423,
+          "product_id": 33896,
+          "manufacturer": "Generic",
+          "product": "Mass Storage Device",
+          "serial": "REDACTED",
+          "version": "2.10",
+          "speed": 480,
+          "max_power_ma": 100,
+          "device_class": 0,
+          "device_sub_class": 0,
+          "device_protocol": 0,
+          "bus_num": 3,
+          "dev_num": 11,
+          "rx_lanes": 1,
+          "tx_lanes": 1,
+          "removable": "unknown",
+          "num_interfaces": 1,
+          "num_configurations": 1,
+          "interfaces": [
+            {
+              "number": 0,
+              "class_code": 8,
+              "sub_class": 6,
+              "protocol": 80,
+              "driver": "usb-storage"
+            }
+          ],
+          "children": [],
+          "is_hub": false,
+          "is_root_hub": false,
+          "bos": {
+            "num_device_caps": 2,
+            "total_length": 22,
+            "capabilities": [
+              {
+                "kind": "Usb2Extension",
+                "bm_attributes": 6,
+                "lpm": true,
+                "besl": true,
+                "baseline_besl_valid": false,
+                "deep_besl_valid": false,
+                "baseline_besl": 0,
+                "deep_besl": 0
+              },
+              {
+                "kind": "SuperSpeed",
+                "ltm_capable": false,
+                "speeds_supported": 14,
+                "functionality_support": 1,
+                "u1_dev_exit_lat_us": 10,
+                "u2_dev_exit_lat_us": 2047
+              }
+            ],
+            "truncated": false
+          },
+          "quirks": 0,
+          "port_id": "3-1-port1",
+          "port_peer_id": "",
+          "port_peer_state": "",
+          "port_connect_type": "",
+          "max_child": 0,
+          "ports_used": null,
+          "bm_attributes": 128,
+          "product_db": "",
+          "raw_attributes": {
+            "authorized": "1",
+            "avoid_reset_quirk": "0",
+            "bConfigurationValue": "1",
+            "bDeviceClass": "00",
+            "bDeviceProtocol": "00",
+            "bDeviceSubClass": "00",
+            "bMaxPacketSize0": "64",
+            "bMaxPower": "100mA",
+            "bNumConfigurations": "1",
+            "bNumInterfaces": "1",
+            "bcdDevice": "0100",
+            "bmAttributes": "80",
+            "busnum": "3",
+            "dev": "189:266",
+            "devnum": "11",
+            "devpath": "1.1",
+            "idProduct": "8468",
+            "idVendor": "058f",
+            "ltm_capable": "no",
+            "manufacturer": "Generic",
+            "maxchild": "0",
+            "product": "Mass Storage Device",
+            "quirks": "0x0",
+            "removable": "unknown",
+            "rx_lanes": "1",
+            "serial": "REDACTED",
+            "speed": "480",
+            "tx_lanes": "1",
+            "uevent": "MAJOR=189\nMINOR=266\nDEVNAME=bus/usb/003/011\nDEVTYPE=usb_device\nDRIVER=usb\nPRODUCT=58f/8468/100\nTYPE=0/0/0\nBUSNUM=003\nDEVNUM=011",
+            "urbnum": "233124",
+            "version": "2.10"
+          }
+        },
+        {
+          "sysfs_path": "/sys/mock-device",
+          "bus_port": "3-1.2",
+          "vendor_id": 3010,
+          "product_id": 44097,
+          "manufacturer": "Seagate",
+          "product": "BUP Portable",
+          "serial": "REDACTED",
+          "version": "2.10",
+          "speed": 480,
+          "max_power_ma": 500,
+          "device_class": 0,
+          "device_sub_class": 0,
+          "device_protocol": 0,
+          "bus_num": 3,
+          "dev_num": 12,
+          "rx_lanes": 1,
+          "tx_lanes": 1,
+          "removable": "unknown",
+          "num_interfaces": 1,
+          "num_configurations": 1,
+          "interfaces": [
+            {
+              "number": 0,
+              "class_code": 8,
+              "sub_class": 6,
+              "protocol": 98,
+              "driver": "uas"
+            }
+          ],
+          "children": [],
+          "is_hub": false,
+          "is_root_hub": false,
+          "bos": {
+            "num_device_caps": 2,
+            "total_length": 22,
+            "capabilities": [
+              {
+                "kind": "Usb2Extension",
+                "bm_attributes": 3854,
+                "lpm": true,
+                "besl": true,
+                "baseline_besl_valid": true,
+                "deep_besl_valid": false,
+                "baseline_besl": 15,
+                "deep_besl": 0
+              },
+              {
+                "kind": "SuperSpeed",
+                "ltm_capable": false,
+                "speeds_supported": 14,
+                "functionality_support": 1,
+                "u1_dev_exit_lat_us": 10,
+                "u2_dev_exit_lat_us": 32
+              }
+            ],
+            "truncated": false
+          },
+          "quirks": 0,
+          "port_id": "3-1-port2",
+          "port_peer_id": "",
+          "port_peer_state": "",
+          "port_connect_type": "",
+          "max_child": 0,
+          "ports_used": null,
+          "bm_attributes": 128,
+          "product_db": "",
+          "raw_attributes": {
+            "authorized": "1",
+            "avoid_reset_quirk": "0",
+            "bConfigurationValue": "1",
+            "bDeviceClass": "00",
+            "bDeviceProtocol": "00",
+            "bDeviceSubClass": "00",
+            "bMaxPacketSize0": "64",
+            "bMaxPower": "500mA",
+            "bNumConfigurations": "1",
+            "bNumInterfaces": "1",
+            "bcdDevice": "1707",
+            "bmAttributes": "80",
+            "bos_descriptors": "\u0005\u000f\u0016\u0000\u0002\u0007\u0010\u0002\u000e\u000f\u0000\u0000\n\u0010\u0003\u0000\u000e\u0000\u0001\n \u0000",
+            "busnum": "3",
+            "dev": "189:267",
+            "devnum": "12",
+            "devpath": "1.2",
+            "idProduct": "ac41",
+            "idVendor": "0bc2",
+            "ltm_capable": "no",
+            "manufacturer": "Seagate",
+            "maxchild": "0",
+            "product": "BUP Portable",
+            "quirks": "0x0",
+            "removable": "unknown",
+            "rx_lanes": "1",
+            "serial": "REDACTED",
+            "speed": "480",
+            "tx_lanes": "1",
+            "uevent": "MAJOR=189\nMINOR=267\nDEVNAME=bus/usb/003/012\nDEVTYPE=usb_device\nDRIVER=usb\nPRODUCT=bc2/ac41/1707\nTYPE=0/0/0\nBUSNUM=003\nDEVNUM=012",
+            "urbnum": "566",
+            "version": "2.10"
+          }
+        },
+        {
+          "sysfs_path": "/sys/mock-device",
+          "bus_port": "3-1.3",
+          "vendor_id": 6720,
+          "product_id": 2049,
+          "manufacturer": "",
+          "product": "USB 2.0 Hub",
+          "serial": "",
+          "version": "2.00",
+          "speed": 480,
+          "max_power_ma": 100,
+          "device_class": 9,
+          "device_sub_class": 0,
+          "device_protocol": 1,
+          "bus_num": 3,
+          "dev_num": 13,
+          "rx_lanes": 1,
+          "tx_lanes": 1,
+          "removable": "unknown",
+          "num_interfaces": 1,
+          "num_configurations": 1,
+          "interfaces": [
+            {
+              "number": 0,
+              "class_code": 9,
+              "sub_class": 0,
+              "protocol": 0,
+              "driver": "hub"
+            }
+          ],
+          "children": [
+            {
+              "sysfs_path": "/sys/mock-device",
+              "bus_port": "3-1.3.2",
+              "vendor_id": 8457,
+              "product_id": 259,
+              "manufacturer": "VLI Inc.",
+              "product": "USB 2.0 BILLBOARD",
+              "serial": "REDACTED",
+              "version": "2.01",
+              "speed": 12,
+              "max_power_ma": 0,
+              "device_class": 17,
+              "device_sub_class": 0,
+              "device_protocol": 0,
+              "bus_num": 3,
+              "dev_num": 15,
+              "rx_lanes": 1,
+              "tx_lanes": 1,
+              "removable": "unknown",
+              "num_interfaces": 1,
+              "num_configurations": 1,
+              "interfaces": [
+                {
+                  "number": 0,
+                  "class_code": 17,
+                  "sub_class": 0,
+                  "protocol": 0,
+                  "driver": ""
+                }
+              ],
+              "children": [],
+              "is_hub": false,
+              "is_root_hub": false,
+              "bos": {
+                "num_device_caps": 4,
+                "total_length": 88,
+                "capabilities": [
+                  {
+                    "kind": "ContainerId",
+                    "uuid": [
+                      0,
+                      0,
+                      0,
+                      0,
+                      0,
+                      0,
+                      0,
+                      0,
+                      0,
+                      0,
+                      0,
+                      0,
+                      0,
+                      0,
+                      0,
+                      0
+                    ]
+                  },
+                  {
+                    "kind": "Billboard",
+                    "num_alternate_modes": 1,
+                    "preferred_alternate_mode": 0,
+                    "vconn_power": 1,
+                    "bcd_version": 289,
+                    "additional_failure_info": 0,
+                    "no_usb_pd_communication": false,
+                    "no_battery_power": false,
+                    "alt_modes": [
+                      {
+                        "index": 0,
+                        "svid": 65281,
+                        "mode": 0,
+                        "state": "NotAttempted"
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "Other",
+                    "cap_type": 15,
+                    "data": [
+                      0,
+                      0,
+                      0,
+                      0,
+                      0
+                    ]
+                  },
+                  {
+                    "kind": "Usb2Extension",
+                    "bm_attributes": 0,
+                    "lpm": false,
+                    "besl": false,
+                    "baseline_besl_valid": false,
+                    "deep_besl_valid": false,
+                    "baseline_besl": 0,
+                    "deep_besl": 0
+                  }
+                ],
+                "truncated": false
+              },
+              "quirks": 0,
+              "port_id": "3-1.3-port2",
+              "port_peer_id": "",
+              "port_peer_state": "",
+              "port_connect_type": "",
+              "max_child": 0,
+              "ports_used": null,
+              "bm_attributes": 192,
+              "product_db": "",
+              "raw_attributes": {
+                "authorized": "1",
+                "avoid_reset_quirk": "0",
+                "bConfigurationValue": "2",
+                "bDeviceClass": "11",
+                "bDeviceProtocol": "00",
+                "bDeviceSubClass": "00",
+                "bMaxPacketSize0": "64",
+                "bMaxPower": "0mA",
+                "bNumConfigurations": "1",
+                "bNumInterfaces": "1",
+                "bcdDevice": "4324",
+                "bmAttributes": "c0",
+                "busnum": "3",
+                "configuration": "http://help.vesa.org/dp-usb-type-c/",
+                "dev": "189:270",
+                "devnum": "15",
+                "devpath": "1.3.2",
+                "idProduct": "0103",
+                "idVendor": "2109",
+                "ltm_capable": "no",
+                "manufacturer": "VLI Inc.",
+                "maxchild": "0",
+                "product": "USB 2.0 BILLBOARD",
+                "quirks": "0x0",
+                "removable": "unknown",
+                "rx_lanes": "1",
+                "serial": "REDACTED",
+                "speed": "12",
+                "tx_lanes": "1",
+                "uevent": "MAJOR=189\nMINOR=270\nDEVNAME=bus/usb/003/015\nDEVTYPE=usb_device\nDRIVER=usb\nPRODUCT=2109/103/4324\nTYPE=17/0/0\nBUSNUM=003\nDEVNUM=015",
+                "urbnum": "14",
+                "version": "2.01"
+              }
+            }
+          ],
+          "is_hub": true,
+          "is_root_hub": false,
+          "bos": null,
+          "quirks": 0,
+          "port_id": "3-1-port3",
+          "port_peer_id": "",
+          "port_peer_state": "",
+          "port_connect_type": "",
+          "max_child": 4,
+          "ports_used": 1,
+          "bm_attributes": 224,
+          "product_db": "",
+          "raw_attributes": {
+            "authorized": "1",
+            "avoid_reset_quirk": "0",
+            "bConfigurationValue": "1",
+            "bDeviceClass": "09",
+            "bDeviceProtocol": "01",
+            "bDeviceSubClass": "00",
+            "bMaxPacketSize0": "64",
+            "bMaxPower": "100mA",
+            "bNumConfigurations": "1",
+            "bNumInterfaces": "1",
+            "bcdDevice": "0100",
+            "bmAttributes": "e0",
+            "busnum": "3",
+            "dev": "189:268",
+            "devnum": "13",
+            "devpath": "1.3",
+            "idProduct": "0801",
+            "idVendor": "1a40",
+            "ltm_capable": "no",
+            "maxchild": "4",
+            "product": "USB 2.0 Hub",
+            "quirks": "0x0",
+            "removable": "unknown",
+            "rx_lanes": "1",
+            "speed": "480",
+            "tx_lanes": "1",
+            "uevent": "MAJOR=189\nMINOR=268\nDEVNAME=bus/usb/003/013\nDEVTYPE=usb_device\nDRIVER=usb\nPRODUCT=1a40/801/100\nTYPE=9/0/1\nBUSNUM=003\nDEVNUM=013",
+            "urbnum": "29",
+            "version": "2.00"
+          }
+        },
+        {
+          "sysfs_path": "/sys/mock-device",
+          "bus_port": "3-1.4",
+          "vendor_id": 3034,
+          "product_id": 33107,
+          "manufacturer": "Realtek",
+          "product": "USB 10/100/1000 LAN",
+          "serial": "REDACTED",
+          "version": "2.10",
+          "speed": 480,
+          "max_power_ma": 350,
+          "device_class": 0,
+          "device_sub_class": 0,
+          "device_protocol": 0,
+          "bus_num": 3,
+          "dev_num": 14,
+          "rx_lanes": 1,
+          "tx_lanes": 1,
+          "removable": "unknown",
+          "num_interfaces": 1,
+          "num_configurations": 2,
+          "interfaces": [
+            {
+              "number": 0,
+              "class_code": 255,
+              "sub_class": 255,
+              "protocol": 0,
+              "driver": "r8152"
+            }
+          ],
+          "children": [],
+          "is_hub": false,
+          "is_root_hub": false,
+          "bos": {
+            "num_device_caps": 2,
+            "total_length": 22,
+            "capabilities": [
+              {
+                "kind": "Usb2Extension",
+                "bm_attributes": 6,
+                "lpm": true,
+                "besl": true,
+                "baseline_besl_valid": false,
+                "deep_besl_valid": false,
+                "baseline_besl": 0,
+                "deep_besl": 0
+              },
+              {
+                "kind": "SuperSpeed",
+                "ltm_capable": true,
+                "speeds_supported": 14,
+                "functionality_support": 2,
+                "u1_dev_exit_lat_us": 10,
+                "u2_dev_exit_lat_us": 2047
+              }
+            ],
+            "truncated": false
+          },
+          "quirks": 1024,
+          "port_id": "3-1-port4",
+          "port_peer_id": "",
+          "port_peer_state": "",
+          "port_connect_type": "",
+          "max_child": 0,
+          "ports_used": null,
+          "bm_attributes": 160,
+          "product_db": "RTL8153 Gigabit Ethernet Adapter",
+          "raw_attributes": {
+            "authorized": "1",
+            "avoid_reset_quirk": "0",
+            "bConfigurationValue": "1",
+            "bDeviceClass": "00",
+            "bDeviceProtocol": "00",
+            "bDeviceSubClass": "00",
+            "bMaxPacketSize0": "64",
+            "bMaxPower": "350mA",
+            "bNumConfigurations": "2",
+            "bNumInterfaces": "1",
+            "bcdDevice": "3100",
+            "bmAttributes": "a0",
+            "busnum": "3",
+            "dev": "189:269",
+            "devnum": "14",
+            "devpath": "1.4",
+            "idProduct": "8153",
+            "idVendor": "0bda",
+            "ltm_capable": "no",
+            "manufacturer": "Realtek",
+            "maxchild": "0",
+            "product": "USB 10/100/1000 LAN",
+            "quirks": "0x400",
+            "removable": "unknown",
+            "rx_lanes": "1",
+            "serial": "REDACTED",
+            "speed": "480",
+            "tx_lanes": "1",
+            "uevent": "MAJOR=189\nMINOR=269\nDEVNAME=bus/usb/003/014\nDEVTYPE=usb_device\nDRIVER=r8152-cfgselector\nPRODUCT=bda/8153/3100\nTYPE=0/0/0\nBUSNUM=003\nDEVNUM=014",
+            "urbnum": "3149127",
+            "version": "2.10"
+          }
+        }
+      ],
+      "is_hub": true,
+      "is_root_hub": false,
+      "bos": {
+        "num_device_caps": 3,
+        "total_length": 42,
+        "capabilities": [
+          {
+            "kind": "Usb2Extension",
+            "bm_attributes": 6,
+            "lpm": true,
+            "besl": true,
+            "baseline_besl_valid": false,
+            "deep_besl_valid": false,
+            "baseline_besl": 0,
+            "deep_besl": 0
+          },
+          {
+            "kind": "SuperSpeed",
+            "ltm_capable": false,
+            "speeds_supported": 14,
+            "functionality_support": 1,
+            "u1_dev_exit_lat_us": 4,
+            "u2_dev_exit_lat_us": 231
+          },
+          {
+            "kind": "ContainerId",
+            "uuid": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          }
+        ],
+        "truncated": false
+      },
+      "quirks": 1024,
+      "port_id": "usb3-port1",
+      "port_peer_id": "",
+      "port_peer_state": "",
+      "port_connect_type": "hotplug",
+      "max_child": 4,
+      "ports_used": 4,
+      "bm_attributes": 224,
+      "product_db": "",
+      "raw_attributes": {
+        "authorized": "1",
+        "avoid_reset_quirk": "0",
+        "bConfigurationValue": "1",
+        "bDeviceClass": "09",
+        "bDeviceProtocol": "02",
+        "bDeviceSubClass": "00",
+        "bMaxPacketSize0": "64",
+        "bMaxPower": "0mA",
+        "bNumConfigurations": "1",
+        "bNumInterfaces": "1",
+        "bcdDevice": "9024",
+        "bmAttributes": "e0",
+        "busnum": "3",
+        "dev": "189:265",
+        "devnum": "10",
+        "devpath": "1",
+        "idProduct": "2817",
+        "idVendor": "2109",
+        "ltm_capable": "no",
+        "manufacturer": "VIA Labs, Inc.",
+        "maxchild": "4",
+        "product": "USB2.0 Hub",
+        "quirks": "0x400",
+        "removable": "removable",
+        "rx_lanes": "1",
+        "speed": "480",
+        "tx_lanes": "1",
+        "uevent": "MAJOR=189\nMINOR=265\nDEVNAME=bus/usb/003/010\nDEVTYPE=usb_device\nDRIVER=usb\nPRODUCT=2109/2817/9024\nTYPE=9/0/2\nBUSNUM=003\nDEVNUM=010",
+        "urbnum": "77",
+        "version": "2.10"
+      }
+    },
+    "typec_port": null,
+    "power_delivery": null,
+    "cable": null
+  },
+  {
+    "category": "UsbDevice",
+    "device_class": "Storage",
+    "device_subclass": "scsi",
+    "status": "Connected",
+    "headline": "Mass Storage Device",
+    "subtitle": "Alcor Micro · Mass Storage",
+    "icon": "drive-removable-media",
+    "vendor": "Generic",
+    "product": "Mass Storage Device",
+    "vendor_id": 1423,
+    "product_id": 33896,
+    "primary_driver": "usb-storage",
+    "properties": [
+      [
+        "serial",
+        "REDACTED"
+      ],
+      [
+        "usb_max_power_ma",
+        "100"
+      ],
+      [
+        "transport.usb2",
+        "true"
+      ],
+      [
+        "usb_capable_speed_mbps",
+        "5000"
+      ],
+      [
+        "usb_capable_speed",
+        "SuperSpeed 5 Gbps"
+      ],
+      [
+        "usb_functional_floor_mbps",
+        "12"
+      ],
+      [
+        "usb_link_verdict",
+        "BelowCapability"
+      ],
+      [
+        "port.id",
+        "3-1-port1"
+      ],
+      [
+        "power.source",
+        "bus"
+      ]
+    ],
+    "link_speed_mbps": 480,
+    "usb_version": "2.1",
+    "power": {
+      "power_in_mw": 0,
+      "power_out_mw": 0,
+      "contract_mw": 0,
+      "power_role": "Unknown"
+    },
+    "charging_diag": null,
+    "data_rate": {
+      "verdict": "BelowCapability",
+      "negotiated_mbps": 480,
+      "capable_mbps": 5000,
+      "functional_floor_mbps": 12,
+      "capable_gen": "",
+      "summary": "Linked at 480 Mbps of an advertised 5 Gbps",
+      "detail": "Vendor declares full functionality from 12 Mbps — not a fault",
+      "is_warning": false
+    },
+    "usb_device": {
+      "sysfs_path": "/sys/mock-device",
+      "bus_port": "3-1.1",
+      "vendor_id": 1423,
+      "product_id": 33896,
+      "manufacturer": "Generic",
+      "product": "Mass Storage Device",
+      "serial": "REDACTED",
+      "version": "2.10",
+      "speed": 480,
+      "max_power_ma": 100,
+      "device_class": 0,
+      "device_sub_class": 0,
+      "device_protocol": 0,
+      "bus_num": 3,
+      "dev_num": 11,
+      "rx_lanes": 1,
+      "tx_lanes": 1,
+      "removable": "unknown",
+      "num_interfaces": 1,
+      "num_configurations": 1,
+      "interfaces": [
+        {
+          "number": 0,
+          "class_code": 8,
+          "sub_class": 6,
+          "protocol": 80,
+          "driver": "usb-storage"
+        }
+      ],
+      "children": [],
+      "is_hub": false,
+      "is_root_hub": false,
+      "bos": {
+        "num_device_caps": 2,
+        "total_length": 22,
+        "capabilities": [
+          {
+            "kind": "Usb2Extension",
+            "bm_attributes": 6,
+            "lpm": true,
+            "besl": true,
+            "baseline_besl_valid": false,
+            "deep_besl_valid": false,
+            "baseline_besl": 0,
+            "deep_besl": 0
+          },
+          {
+            "kind": "SuperSpeed",
+            "ltm_capable": false,
+            "speeds_supported": 14,
+            "functionality_support": 1,
+            "u1_dev_exit_lat_us": 10,
+            "u2_dev_exit_lat_us": 2047
+          }
+        ],
+        "truncated": false
+      },
+      "quirks": 0,
+      "port_id": "3-1-port1",
+      "port_peer_id": "",
+      "port_peer_state": "",
+      "port_connect_type": "",
+      "max_child": 0,
+      "ports_used": null,
+      "bm_attributes": 128,
+      "product_db": "",
+      "raw_attributes": {
+        "authorized": "1",
+        "avoid_reset_quirk": "0",
+        "bConfigurationValue": "1",
+        "bDeviceClass": "00",
+        "bDeviceProtocol": "00",
+        "bDeviceSubClass": "00",
+        "bMaxPacketSize0": "64",
+        "bMaxPower": "100mA",
+        "bNumConfigurations": "1",
+        "bNumInterfaces": "1",
+        "bcdDevice": "0100",
+        "bmAttributes": "80",
+        "busnum": "3",
+        "dev": "189:266",
+        "devnum": "11",
+        "devpath": "1.1",
+        "idProduct": "8468",
+        "idVendor": "058f",
+        "ltm_capable": "no",
+        "manufacturer": "Generic",
+        "maxchild": "0",
+        "product": "Mass Storage Device",
+        "quirks": "0x0",
+        "removable": "unknown",
+        "rx_lanes": "1",
+        "serial": "REDACTED",
+        "speed": "480",
+        "tx_lanes": "1",
+        "uevent": "MAJOR=189\nMINOR=266\nDEVNAME=bus/usb/003/011\nDEVTYPE=usb_device\nDRIVER=usb\nPRODUCT=58f/8468/100\nTYPE=0/0/0\nBUSNUM=003\nDEVNUM=011",
+        "urbnum": "233124",
+        "version": "2.10"
+      }
+    },
+    "typec_port": null,
+    "power_delivery": null,
+    "cable": null
+  },
+  {
+    "category": "UsbDevice",
+    "device_class": "Storage",
+    "device_subclass": "scsi",
+    "status": "Connected",
+    "headline": "BUP Portable",
+    "subtitle": "Seagate · Mass Storage",
+    "icon": "drive-removable-media",
+    "vendor": "Seagate",
+    "product": "BUP Portable",
+    "vendor_id": 3010,
+    "product_id": 44097,
+    "primary_driver": "uas",
+    "properties": [
+      [
+        "serial",
+        "REDACTED"
+      ],
+      [
+        "usb_max_power_ma",
+        "500"
+      ],
+      [
+        "transport.usb2",
+        "true"
+      ],
+      [
+        "usb_capable_speed_mbps",
+        "5000"
+      ],
+      [
+        "usb_capable_speed",
+        "SuperSpeed 5 Gbps"
+      ],
+      [
+        "usb_functional_floor_mbps",
+        "12"
+      ],
+      [
+        "usb_link_verdict",
+        "BelowCapability"
+      ],
+      [
+        "port.id",
+        "3-1-port2"
+      ],
+      [
+        "power.source",
+        "bus"
+      ]
+    ],
+    "link_speed_mbps": 480,
+    "usb_version": "2.1",
+    "power": {
+      "power_in_mw": 0,
+      "power_out_mw": 0,
+      "contract_mw": 0,
+      "power_role": "Unknown"
+    },
+    "charging_diag": null,
+    "data_rate": {
+      "verdict": "BelowCapability",
+      "negotiated_mbps": 480,
+      "capable_mbps": 5000,
+      "functional_floor_mbps": 12,
+      "capable_gen": "",
+      "summary": "Linked at 480 Mbps of an advertised 5 Gbps",
+      "detail": "Vendor declares full functionality from 12 Mbps — not a fault",
+      "is_warning": false
+    },
+    "usb_device": {
+      "sysfs_path": "/sys/mock-device",
+      "bus_port": "3-1.2",
+      "vendor_id": 3010,
+      "product_id": 44097,
+      "manufacturer": "Seagate",
+      "product": "BUP Portable",
+      "serial": "REDACTED",
+      "version": "2.10",
+      "speed": 480,
+      "max_power_ma": 500,
+      "device_class": 0,
+      "device_sub_class": 0,
+      "device_protocol": 0,
+      "bus_num": 3,
+      "dev_num": 12,
+      "rx_lanes": 1,
+      "tx_lanes": 1,
+      "removable": "unknown",
+      "num_interfaces": 1,
+      "num_configurations": 1,
+      "interfaces": [
+        {
+          "number": 0,
+          "class_code": 8,
+          "sub_class": 6,
+          "protocol": 98,
+          "driver": "uas"
+        }
+      ],
+      "children": [],
+      "is_hub": false,
+      "is_root_hub": false,
+      "bos": {
+        "num_device_caps": 2,
+        "total_length": 22,
+        "capabilities": [
+          {
+            "kind": "Usb2Extension",
+            "bm_attributes": 3854,
+            "lpm": true,
+            "besl": true,
+            "baseline_besl_valid": true,
+            "deep_besl_valid": false,
+            "baseline_besl": 15,
+            "deep_besl": 0
+          },
+          {
+            "kind": "SuperSpeed",
+            "ltm_capable": false,
+            "speeds_supported": 14,
+            "functionality_support": 1,
+            "u1_dev_exit_lat_us": 10,
+            "u2_dev_exit_lat_us": 32
+          }
+        ],
+        "truncated": false
+      },
+      "quirks": 0,
+      "port_id": "3-1-port2",
+      "port_peer_id": "",
+      "port_peer_state": "",
+      "port_connect_type": "",
+      "max_child": 0,
+      "ports_used": null,
+      "bm_attributes": 128,
+      "product_db": "",
+      "raw_attributes": {
+        "authorized": "1",
+        "avoid_reset_quirk": "0",
+        "bConfigurationValue": "1",
+        "bDeviceClass": "00",
+        "bDeviceProtocol": "00",
+        "bDeviceSubClass": "00",
+        "bMaxPacketSize0": "64",
+        "bMaxPower": "500mA",
+        "bNumConfigurations": "1",
+        "bNumInterfaces": "1",
+        "bcdDevice": "1707",
+        "bmAttributes": "80",
+        "bos_descriptors": "\u0005\u000f\u0016\u0000\u0002\u0007\u0010\u0002\u000e\u000f\u0000\u0000\n\u0010\u0003\u0000\u000e\u0000\u0001\n \u0000",
+        "busnum": "3",
+        "dev": "189:267",
+        "devnum": "12",
+        "devpath": "1.2",
+        "idProduct": "ac41",
+        "idVendor": "0bc2",
+        "ltm_capable": "no",
+        "manufacturer": "Seagate",
+        "maxchild": "0",
+        "product": "BUP Portable",
+        "quirks": "0x0",
+        "removable": "unknown",
+        "rx_lanes": "1",
+        "serial": "REDACTED",
+        "speed": "480",
+        "tx_lanes": "1",
+        "uevent": "MAJOR=189\nMINOR=267\nDEVNAME=bus/usb/003/012\nDEVTYPE=usb_device\nDRIVER=usb\nPRODUCT=bc2/ac41/1707\nTYPE=0/0/0\nBUSNUM=003\nDEVNUM=012",
+        "urbnum": "566",
+        "version": "2.10"
+      }
+    },
+    "typec_port": null,
+    "power_delivery": null,
+    "cable": null
+  },
+  {
+    "category": "Hub",
+    "device_class": "Hub",
+    "device_subclass": "",
+    "status": "Connected",
+    "headline": "USB 2.0 Hub",
+    "subtitle": "Terminus Technology · Hub",
+    "icon": "network-wired",
+    "vendor": "Terminus Technology",
+    "product": "USB 2.0 Hub",
+    "vendor_id": 6720,
+    "product_id": 2049,
+    "primary_driver": "hub",
+    "properties": [
+      [
+        "usb_max_power_ma",
+        "100"
+      ],
+      [
+        "transport.usb2",
+        "true"
+      ],
+      [
+        "port.id",
+        "3-1-port3"
+      ],
+      [
+        "hub.ports_total",
+        "4"
+      ],
+      [
+        "hub.ports_used",
+        "1"
+      ],
+      [
+        "power.source",
+        "self"
+      ],
+      [
+        "hub.power_committed_ma",
+        "0"
+      ]
+    ],
+    "link_speed_mbps": 480,
+    "usb_version": "2.0",
+    "power": {
+      "power_in_mw": 0,
+      "power_out_mw": 0,
+      "contract_mw": 0,
+      "power_role": "Unknown"
+    },
+    "charging_diag": null,
+    "data_rate": null,
+    "usb_device": {
+      "sysfs_path": "/sys/mock-device",
+      "bus_port": "3-1.3",
+      "vendor_id": 6720,
+      "product_id": 2049,
+      "manufacturer": "",
+      "product": "USB 2.0 Hub",
+      "serial": "",
+      "version": "2.00",
+      "speed": 480,
+      "max_power_ma": 100,
+      "device_class": 9,
+      "device_sub_class": 0,
+      "device_protocol": 1,
+      "bus_num": 3,
+      "dev_num": 13,
+      "rx_lanes": 1,
+      "tx_lanes": 1,
+      "removable": "unknown",
+      "num_interfaces": 1,
+      "num_configurations": 1,
+      "interfaces": [
+        {
+          "number": 0,
+          "class_code": 9,
+          "sub_class": 0,
+          "protocol": 0,
+          "driver": "hub"
+        }
+      ],
+      "children": [
+        {
+          "sysfs_path": "/sys/mock-device",
+          "bus_port": "3-1.3.2",
+          "vendor_id": 8457,
+          "product_id": 259,
+          "manufacturer": "VLI Inc.",
+          "product": "USB 2.0 BILLBOARD",
+          "serial": "REDACTED",
+          "version": "2.01",
+          "speed": 12,
+          "max_power_ma": 0,
+          "device_class": 17,
+          "device_sub_class": 0,
+          "device_protocol": 0,
+          "bus_num": 3,
+          "dev_num": 15,
+          "rx_lanes": 1,
+          "tx_lanes": 1,
+          "removable": "unknown",
+          "num_interfaces": 1,
+          "num_configurations": 1,
+          "interfaces": [
+            {
+              "number": 0,
+              "class_code": 17,
+              "sub_class": 0,
+              "protocol": 0,
+              "driver": ""
+            }
+          ],
+          "children": [],
+          "is_hub": false,
+          "is_root_hub": false,
+          "bos": {
+            "num_device_caps": 4,
+            "total_length": 88,
+            "capabilities": [
+              {
+                "kind": "ContainerId",
+                "uuid": [
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              {
+                "kind": "Billboard",
+                "num_alternate_modes": 1,
+                "preferred_alternate_mode": 0,
+                "vconn_power": 1,
+                "bcd_version": 289,
+                "additional_failure_info": 0,
+                "no_usb_pd_communication": false,
+                "no_battery_power": false,
+                "alt_modes": [
+                  {
+                    "index": 0,
+                    "svid": 65281,
+                    "mode": 0,
+                    "state": "NotAttempted"
+                  }
+                ]
+              },
+              {
+                "kind": "Other",
+                "cap_type": 15,
+                "data": [
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ]
+              },
+              {
+                "kind": "Usb2Extension",
+                "bm_attributes": 0,
+                "lpm": false,
+                "besl": false,
+                "baseline_besl_valid": false,
+                "deep_besl_valid": false,
+                "baseline_besl": 0,
+                "deep_besl": 0
+              }
+            ],
+            "truncated": false
+          },
+          "quirks": 0,
+          "port_id": "3-1.3-port2",
+          "port_peer_id": "",
+          "port_peer_state": "",
+          "port_connect_type": "",
+          "max_child": 0,
+          "ports_used": null,
+          "bm_attributes": 192,
+          "product_db": "",
+          "raw_attributes": {
+            "authorized": "1",
+            "avoid_reset_quirk": "0",
+            "bConfigurationValue": "2",
+            "bDeviceClass": "11",
+            "bDeviceProtocol": "00",
+            "bDeviceSubClass": "00",
+            "bMaxPacketSize0": "64",
+            "bMaxPower": "0mA",
+            "bNumConfigurations": "1",
+            "bNumInterfaces": "1",
+            "bcdDevice": "4324",
+            "bmAttributes": "c0",
+            "busnum": "3",
+            "configuration": "http://help.vesa.org/dp-usb-type-c/",
+            "dev": "189:270",
+            "devnum": "15",
+            "devpath": "1.3.2",
+            "idProduct": "0103",
+            "idVendor": "2109",
+            "ltm_capable": "no",
+            "manufacturer": "VLI Inc.",
+            "maxchild": "0",
+            "product": "USB 2.0 BILLBOARD",
+            "quirks": "0x0",
+            "removable": "unknown",
+            "rx_lanes": "1",
+            "serial": "REDACTED",
+            "speed": "12",
+            "tx_lanes": "1",
+            "uevent": "MAJOR=189\nMINOR=270\nDEVNAME=bus/usb/003/015\nDEVTYPE=usb_device\nDRIVER=usb\nPRODUCT=2109/103/4324\nTYPE=17/0/0\nBUSNUM=003\nDEVNUM=015",
+            "urbnum": "14",
+            "version": "2.01"
+          }
+        }
+      ],
+      "is_hub": true,
+      "is_root_hub": false,
+      "bos": null,
+      "quirks": 0,
+      "port_id": "3-1-port3",
+      "port_peer_id": "",
+      "port_peer_state": "",
+      "port_connect_type": "",
+      "max_child": 4,
+      "ports_used": 1,
+      "bm_attributes": 224,
+      "product_db": "",
+      "raw_attributes": {
+        "authorized": "1",
+        "avoid_reset_quirk": "0",
+        "bConfigurationValue": "1",
+        "bDeviceClass": "09",
+        "bDeviceProtocol": "01",
+        "bDeviceSubClass": "00",
+        "bMaxPacketSize0": "64",
+        "bMaxPower": "100mA",
+        "bNumConfigurations": "1",
+        "bNumInterfaces": "1",
+        "bcdDevice": "0100",
+        "bmAttributes": "e0",
+        "busnum": "3",
+        "dev": "189:268",
+        "devnum": "13",
+        "devpath": "1.3",
+        "idProduct": "0801",
+        "idVendor": "1a40",
+        "ltm_capable": "no",
+        "maxchild": "4",
+        "product": "USB 2.0 Hub",
+        "quirks": "0x0",
+        "removable": "unknown",
+        "rx_lanes": "1",
+        "speed": "480",
+        "tx_lanes": "1",
+        "uevent": "MAJOR=189\nMINOR=268\nDEVNAME=bus/usb/003/013\nDEVTYPE=usb_device\nDRIVER=usb\nPRODUCT=1a40/801/100\nTYPE=9/0/1\nBUSNUM=003\nDEVNUM=013",
+        "urbnum": "29",
+        "version": "2.00"
+      }
+    },
+    "typec_port": null,
+    "power_delivery": null,
+    "cable": null
+  },
+  {
+    "category": "UsbDevice",
+    "device_class": "Unknown",
+    "device_subclass": "",
+    "status": "Connected",
+    "headline": "USB 2.0 BILLBOARD",
+    "subtitle": "VIA Labs · Billboard",
+    "icon": "drive-removable-media-usb",
+    "vendor": "VLI Inc.",
+    "product": "USB 2.0 BILLBOARD",
+    "vendor_id": 8457,
+    "product_id": 259,
+    "primary_driver": "",
+    "properties": [
+      [
+        "serial",
+        "REDACTED"
+      ],
+      [
+        "transport.usb2",
+        "true"
+      ],
+      [
+        "usb_altmode_svids",
+        "ff01"
+      ],
+      [
+        "usb_altmode_state",
+        "NotAttempted"
+      ],
+      [
+        "port.id",
+        "3-1.3-port2"
+      ],
+      [
+        "power.source",
+        "self"
+      ]
+    ],
+    "link_speed_mbps": 12,
+    "usb_version": "2.0",
+    "power": {
+      "power_in_mw": 0,
+      "power_out_mw": 0,
+      "contract_mw": 0,
+      "power_role": "Unknown"
+    },
+    "charging_diag": null,
+    "data_rate": {
+      "verdict": "Unknown",
+      "negotiated_mbps": 12,
+      "capable_mbps": 0,
+      "functional_floor_mbps": 0,
+      "capable_gen": "",
+      "summary": "",
+      "detail": "",
+      "is_warning": false
+    },
+    "usb_device": {
+      "sysfs_path": "/sys/mock-device",
+      "bus_port": "3-1.3.2",
+      "vendor_id": 8457,
+      "product_id": 259,
+      "manufacturer": "VLI Inc.",
+      "product": "USB 2.0 BILLBOARD",
+      "serial": "REDACTED",
+      "version": "2.01",
+      "speed": 12,
+      "max_power_ma": 0,
+      "device_class": 17,
+      "device_sub_class": 0,
+      "device_protocol": 0,
+      "bus_num": 3,
+      "dev_num": 15,
+      "rx_lanes": 1,
+      "tx_lanes": 1,
+      "removable": "unknown",
+      "num_interfaces": 1,
+      "num_configurations": 1,
+      "interfaces": [
+        {
+          "number": 0,
+          "class_code": 17,
+          "sub_class": 0,
+          "protocol": 0,
+          "driver": ""
+        }
+      ],
+      "children": [],
+      "is_hub": false,
+      "is_root_hub": false,
+      "bos": {
+        "num_device_caps": 4,
+        "total_length": 88,
+        "capabilities": [
+          {
+            "kind": "ContainerId",
+            "uuid": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "kind": "Billboard",
+            "num_alternate_modes": 1,
+            "preferred_alternate_mode": 0,
+            "vconn_power": 1,
+            "bcd_version": 289,
+            "additional_failure_info": 0,
+            "no_usb_pd_communication": false,
+            "no_battery_power": false,
+            "alt_modes": [
+              {
+                "index": 0,
+                "svid": 65281,
+                "mode": 0,
+                "state": "NotAttempted"
+              }
+            ]
+          },
+          {
+            "kind": "Other",
+            "cap_type": 15,
+            "data": [
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "kind": "Usb2Extension",
+            "bm_attributes": 0,
+            "lpm": false,
+            "besl": false,
+            "baseline_besl_valid": false,
+            "deep_besl_valid": false,
+            "baseline_besl": 0,
+            "deep_besl": 0
+          }
+        ],
+        "truncated": false
+      },
+      "quirks": 0,
+      "port_id": "3-1.3-port2",
+      "port_peer_id": "",
+      "port_peer_state": "",
+      "port_connect_type": "",
+      "max_child": 0,
+      "ports_used": null,
+      "bm_attributes": 192,
+      "product_db": "",
+      "raw_attributes": {
+        "authorized": "1",
+        "avoid_reset_quirk": "0",
+        "bConfigurationValue": "2",
+        "bDeviceClass": "11",
+        "bDeviceProtocol": "00",
+        "bDeviceSubClass": "00",
+        "bMaxPacketSize0": "64",
+        "bMaxPower": "0mA",
+        "bNumConfigurations": "1",
+        "bNumInterfaces": "1",
+        "bcdDevice": "4324",
+        "bmAttributes": "c0",
+        "busnum": "3",
+        "configuration": "http://help.vesa.org/dp-usb-type-c/",
+        "dev": "189:270",
+        "devnum": "15",
+        "devpath": "1.3.2",
+        "idProduct": "0103",
+        "idVendor": "2109",
+        "ltm_capable": "no",
+        "manufacturer": "VLI Inc.",
+        "maxchild": "0",
+        "product": "USB 2.0 BILLBOARD",
+        "quirks": "0x0",
+        "removable": "unknown",
+        "rx_lanes": "1",
+        "serial": "REDACTED",
+        "speed": "12",
+        "tx_lanes": "1",
+        "uevent": "MAJOR=189\nMINOR=270\nDEVNAME=bus/usb/003/015\nDEVTYPE=usb_device\nDRIVER=usb\nPRODUCT=2109/103/4324\nTYPE=17/0/0\nBUSNUM=003\nDEVNUM=015",
+        "urbnum": "14",
+        "version": "2.01"
+      }
+    },
+    "typec_port": null,
+    "power_delivery": null,
+    "cable": null
+  },
+  {
+    "category": "UsbDevice",
+    "device_class": "NetworkWired",
+    "device_subclass": "",
+    "status": "Connected",
+    "headline": "USB 10/100/1000 LAN",
+    "subtitle": "Realtek · Vendor Specific",
+    "icon": "network-wired",
+    "vendor": "Realtek",
+    "product": "USB 10/100/1000 LAN",
+    "vendor_id": 3034,
+    "product_id": 33107,
+    "primary_driver": "r8152",
+    "properties": [
+      [
+        "serial",
+        "REDACTED"
+      ],
+      [
+        "usb_max_power_ma",
+        "350"
+      ],
+      [
+        "transport.usb2",
+        "true"
+      ],
+      [
+        "usb_capable_speed_mbps",
+        "5000"
+      ],
+      [
+        "usb_capable_speed",
+        "SuperSpeed 5 Gbps"
+      ],
+      [
+        "usb_functional_floor_mbps",
+        "480"
+      ],
+      [
+        "usb_link_verdict",
+        "BelowCapability"
+      ],
+      [
+        "port.id",
+        "3-1-port4"
+      ],
+      [
+        "power.source",
+        "bus"
+      ],
+      [
+        "kernel.quirks",
+        "NO_LPM"
+      ],
+      [
+        "product_db",
+        "RTL8153 Gigabit Ethernet Adapter"
+      ]
+    ],
+    "link_speed_mbps": 480,
+    "usb_version": "2.1",
+    "power": {
+      "power_in_mw": 0,
+      "power_out_mw": 0,
+      "contract_mw": 0,
+      "power_role": "Unknown"
+    },
+    "charging_diag": null,
+    "data_rate": {
+      "verdict": "BelowCapability",
+      "negotiated_mbps": 480,
+      "capable_mbps": 5000,
+      "functional_floor_mbps": 480,
+      "capable_gen": "",
+      "summary": "Linked at 480 Mbps of an advertised 5 Gbps",
+      "detail": "Vendor declares full functionality from 480 Mbps — not a fault",
+      "is_warning": false
+    },
+    "usb_device": {
+      "sysfs_path": "/sys/mock-device",
+      "bus_port": "3-1.4",
+      "vendor_id": 3034,
+      "product_id": 33107,
+      "manufacturer": "Realtek",
+      "product": "USB 10/100/1000 LAN",
+      "serial": "REDACTED",
+      "version": "2.10",
+      "speed": 480,
+      "max_power_ma": 350,
+      "device_class": 0,
+      "device_sub_class": 0,
+      "device_protocol": 0,
+      "bus_num": 3,
+      "dev_num": 14,
+      "rx_lanes": 1,
+      "tx_lanes": 1,
+      "removable": "unknown",
+      "num_interfaces": 1,
+      "num_configurations": 2,
+      "interfaces": [
+        {
+          "number": 0,
+          "class_code": 255,
+          "sub_class": 255,
+          "protocol": 0,
+          "driver": "r8152"
+        }
+      ],
+      "children": [],
+      "is_hub": false,
+      "is_root_hub": false,
+      "bos": {
+        "num_device_caps": 2,
+        "total_length": 22,
+        "capabilities": [
+          {
+            "kind": "Usb2Extension",
+            "bm_attributes": 6,
+            "lpm": true,
+            "besl": true,
+            "baseline_besl_valid": false,
+            "deep_besl_valid": false,
+            "baseline_besl": 0,
+            "deep_besl": 0
+          },
+          {
+            "kind": "SuperSpeed",
+            "ltm_capable": true,
+            "speeds_supported": 14,
+            "functionality_support": 2,
+            "u1_dev_exit_lat_us": 10,
+            "u2_dev_exit_lat_us": 2047
+          }
+        ],
+        "truncated": false
+      },
+      "quirks": 1024,
+      "port_id": "3-1-port4",
+      "port_peer_id": "",
+      "port_peer_state": "",
+      "port_connect_type": "",
+      "max_child": 0,
+      "ports_used": null,
+      "bm_attributes": 160,
+      "product_db": "RTL8153 Gigabit Ethernet Adapter",
+      "raw_attributes": {
+        "authorized": "1",
+        "avoid_reset_quirk": "0",
+        "bConfigurationValue": "1",
+        "bDeviceClass": "00",
+        "bDeviceProtocol": "00",
+        "bDeviceSubClass": "00",
+        "bMaxPacketSize0": "64",
+        "bMaxPower": "350mA",
+        "bNumConfigurations": "2",
+        "bNumInterfaces": "1",
+        "bcdDevice": "3100",
+        "bmAttributes": "a0",
+        "busnum": "3",
+        "dev": "189:269",
+        "devnum": "14",
+        "devpath": "1.4",
+        "idProduct": "8153",
+        "idVendor": "0bda",
+        "ltm_capable": "no",
+        "manufacturer": "Realtek",
+        "maxchild": "0",
+        "product": "USB 10/100/1000 LAN",
+        "quirks": "0x400",
+        "removable": "unknown",
+        "rx_lanes": "1",
+        "serial": "REDACTED",
+        "speed": "480",
+        "tx_lanes": "1",
+        "uevent": "MAJOR=189\nMINOR=269\nDEVNAME=bus/usb/003/014\nDEVTYPE=usb_device\nDRIVER=r8152-cfgselector\nPRODUCT=bda/8153/3100\nTYPE=0/0/0\nBUSNUM=003\nDEVNUM=014",
+        "urbnum": "3149127",
+        "version": "2.10"
+      }
+    },
+    "typec_port": null,
+    "power_delivery": null,
+    "cable": null
+  },
+  {
+    "category": "UsbDevice",
+    "device_class": "Bluetooth",
+    "device_subclass": "",
+    "status": "Connected",
+    "headline": "Intel Wireless",
+    "subtitle": "Intel · Wireless",
+    "icon": "bluetooth",
+    "vendor": "Intel",
+    "product": "",
+    "vendor_id": 32903,
+    "product_id": 51,
+    "primary_driver": "btusb",
+    "properties": [
+      [
+        "mount",
+        "fixed"
+      ],
+      [
+        "usb_max_power_ma",
+        "100"
+      ],
+      [
+        "transport.usb2",
+        "true"
+      ],
+      [
+        "port.id",
+        "usb3-port10"
+      ],
+      [
+        "port.connect_type",
+        "hardwired"
+      ],
+      [
+        "power.source",
+        "self"
+      ],
+      [
+        "product_db",
+        "AX211 Bluetooth"
+      ]
+    ],
+    "link_speed_mbps": 12,
+    "usb_version": "2.0",
+    "power": {
+      "power_in_mw": 0,
+      "power_out_mw": 0,
+      "contract_mw": 0,
+      "power_role": "Unknown"
+    },
+    "charging_diag": null,
+    "data_rate": {
+      "verdict": "Unknown",
+      "negotiated_mbps": 12,
+      "capable_mbps": 0,
+      "functional_floor_mbps": 0,
+      "capable_gen": "",
+      "summary": "",
+      "detail": "",
+      "is_warning": false
+    },
+    "usb_device": {
+      "sysfs_path": "/sys/mock-device",
+      "bus_port": "3-10",
+      "vendor_id": 32903,
+      "product_id": 51,
+      "manufacturer": "",
+      "product": "",
+      "serial": "",
+      "version": "2.01",
+      "speed": 12,
+      "max_power_ma": 100,
+      "device_class": 224,
+      "device_sub_class": 1,
+      "device_protocol": 1,
+      "bus_num": 3,
+      "dev_num": 4,
+      "rx_lanes": 1,
+      "tx_lanes": 1,
+      "removable": "fixed",
+      "num_interfaces": 2,
+      "num_configurations": 1,
+      "interfaces": [
+        {
+          "number": 0,
+          "class_code": 224,
+          "sub_class": 1,
+          "protocol": 1,
+          "driver": "btusb"
+        },
+        {
+          "number": 1,
+          "class_code": 224,
+          "sub_class": 1,
+          "protocol": 1,
+          "driver": "btusb"
+        }
+      ],
+      "children": [],
+      "is_hub": false,
+      "is_root_hub": false,
+      "bos": {
+        "num_device_caps": 1,
+        "total_length": 12,
+        "capabilities": [
+          {
+            "kind": "Usb2Extension",
+            "bm_attributes": 1038,
+            "lpm": true,
+            "besl": true,
+            "baseline_besl_valid": true,
+            "deep_besl_valid": false,
+            "baseline_besl": 4,
+            "deep_besl": 0
+          }
+        ],
+        "truncated": false
+      },
+      "quirks": 0,
+      "port_id": "usb3-port10",
+      "port_peer_id": "",
+      "port_peer_state": "",
+      "port_connect_type": "hardwired",
+      "max_child": 0,
+      "ports_used": null,
+      "bm_attributes": 224,
+      "product_db": "AX211 Bluetooth",
+      "raw_attributes": {
+        "authorized": "1",
+        "avoid_reset_quirk": "0",
+        "bConfigurationValue": "1",
+        "bDeviceClass": "e0",
+        "bDeviceProtocol": "01",
+        "bDeviceSubClass": "01",
+        "bMaxPacketSize0": "64",
+        "bMaxPower": "100mA",
+        "bNumConfigurations": "1",
+        "bNumInterfaces": "2",
+        "bcdDevice": "0000",
+        "bmAttributes": "e0",
+        "bos_descriptors": "\u0005\u000f\f\u0000\u0001\u0007\u0010\u0002\u000e\u0004\u0000\u0000",
+        "busnum": "3",
+        "dev": "189:259",
+        "devnum": "4",
+        "devpath": "10",
+        "idProduct": "0033",
+        "idVendor": "8087",
+        "ltm_capable": "no",
+        "maxchild": "0",
+        "quirks": "0x0",
+        "removable": "fixed",
+        "rx_lanes": "1",
+        "speed": "12",
+        "tx_lanes": "1",
+        "uevent": "MAJOR=189\nMINOR=259\nDEVNAME=bus/usb/003/004\nDEVTYPE=usb_device\nDRIVER=usb\nPRODUCT=8087/33/0\nTYPE=224/1/1\nBUSNUM=003\nDEVNUM=004",
+        "urbnum": "824292",
+        "version": "2.01"
+      }
+    },
+    "typec_port": null,
+    "power_delivery": null,
+    "cable": null
+  },
+  {
+    "category": "UsbDevice",
+    "device_class": "Camera",
+    "device_subclass": "webcam",
+    "status": "Connected",
+    "headline": "USB2.0 FHD UVC WebCam",
+    "subtitle": "Miscellaneous",
+    "icon": "camera-web",
+    "vendor": "Shinetech",
+    "product": "USB2.0 FHD UVC WebCam",
+    "vendor_id": 12919,
+    "product_id": 51,
+    "primary_driver": "uvcvideo",
+    "properties": [
+      [
+        "serial",
+        "REDACTED"
+      ],
+      [
+        "mount",
+        "fixed"
+      ],
+      [
+        "usb_max_power_ma",
+        "500"
+      ],
+      [
+        "transport.usb2",
+        "true"
+      ],
+      [
+        "port.id",
+        "usb3-port8"
+      ],
+      [
+        "port.connect_type",
+        "hardwired"
+      ],
+      [
+        "power.source",
+        "bus"
+      ]
+    ],
+    "link_speed_mbps": 480,
+    "usb_version": "2.0",
+    "power": {
+      "power_in_mw": 0,
+      "power_out_mw": 0,
+      "contract_mw": 0,
+      "power_role": "Unknown"
+    },
+    "charging_diag": null,
+    "data_rate": {
+      "verdict": "Unknown",
+      "negotiated_mbps": 480,
+      "capable_mbps": 0,
+      "functional_floor_mbps": 0,
+      "capable_gen": "",
+      "summary": "",
+      "detail": "",
+      "is_warning": false
+    },
+    "usb_device": {
+      "sysfs_path": "/sys/mock-device",
+      "bus_port": "3-8",
+      "vendor_id": 12919,
+      "product_id": 51,
+      "manufacturer": "Shinetech",
+      "product": "USB2.0 FHD UVC WebCam",
+      "serial": "REDACTED",
+      "version": "2.01",
+      "speed": 480,
+      "max_power_ma": 500,
+      "device_class": 239,
+      "device_sub_class": 2,
+      "device_protocol": 1,
+      "bus_num": 3,
+      "dev_num": 3,
+      "rx_lanes": 1,
+      "tx_lanes": 1,
+      "removable": "fixed",
+      "num_interfaces": 5,
+      "num_configurations": 1,
+      "interfaces": [
+        {
+          "number": 0,
+          "class_code": 14,
+          "sub_class": 1,
+          "protocol": 0,
+          "driver": "uvcvideo"
+        },
+        {
+          "number": 1,
+          "class_code": 14,
+          "sub_class": 2,
+          "protocol": 0,
+          "driver": "uvcvideo"
+        },
+        {
+          "number": 2,
+          "class_code": 14,
+          "sub_class": 1,
+          "protocol": 1,
+          "driver": "uvcvideo"
+        },
+        {
+          "number": 3,
+          "class_code": 14,
+          "sub_class": 2,
+          "protocol": 1,
+          "driver": "uvcvideo"
+        },
+        {
+          "number": 4,
+          "class_code": 254,
+          "sub_class": 1,
+          "protocol": 1,
+          "driver": ""
+        }
+      ],
+      "children": [],
+      "is_hub": false,
+      "is_root_hub": false,
+      "bos": {
+        "num_device_caps": 2,
+        "total_length": 41,
+        "capabilities": [
+          {
+            "kind": "Other",
+            "cap_type": 5,
+            "data": [
+              0,
+              223,
+              96,
+              221,
+              216,
+              137,
+              69,
+              199,
+              76,
+              156,
+              210,
+              101,
+              157,
+              158,
+              100,
+              138,
+              159,
+              0,
+              0,
+              3,
+              6,
+              200,
+              4,
+              21,
+              0
+            ]
+          },
+          {
+            "kind": "Other",
+            "cap_type": 17,
+            "data": [
+              1,
+              3,
+              0,
+              0,
+              0
+            ]
+          }
+        ],
+        "truncated": false
+      },
+      "quirks": 0,
+      "port_id": "usb3-port8",
+      "port_peer_id": "",
+      "port_peer_state": "",
+      "port_connect_type": "hardwired",
+      "max_child": 0,
+      "ports_used": null,
+      "bm_attributes": 128,
+      "product_db": "",
+      "raw_attributes": {
+        "authorized": "1",
+        "avoid_reset_quirk": "0",
+        "bConfigurationValue": "1",
+        "bDeviceClass": "ef",
+        "bDeviceProtocol": "01",
+        "bDeviceSubClass": "02",
+        "bMaxPacketSize0": "64",
+        "bMaxPower": "500mA",
+        "bNumConfigurations": "1",
+        "bNumInterfaces": "5",
+        "bcdDevice": "0003",
+        "bmAttributes": "80",
+        "busnum": "3",
+        "configuration": "USB2.0 FHD UVC WebCam",
+        "dev": "189:258",
+        "devnum": "3",
+        "devpath": "8",
+        "idProduct": "0033",
+        "idVendor": "3277",
+        "ltm_capable": "no",
+        "manufacturer": "Shinetech",
+        "maxchild": "0",
+        "product": "USB2.0 FHD UVC WebCam",
+        "quirks": "0x0",
+        "removable": "fixed",
+        "rx_lanes": "1",
+        "serial": "REDACTED",
+        "speed": "480",
+        "tx_lanes": "1",
+        "uevent": "MAJOR=189\nMINOR=258\nDEVNAME=bus/usb/003/003\nDEVTYPE=usb_device\nDRIVER=usb\nPRODUCT=3277/33/3\nTYPE=239/2/1\nBUSNUM=003\nDEVNUM=003",
+        "urbnum": "1533",
+        "version": "2.01"
+      }
+    },
+    "typec_port": null,
+    "power_delivery": null,
+    "cable": null
+  }
+]

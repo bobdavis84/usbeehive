@@ -6,10 +6,10 @@
 use std::collections::{BTreeMap, HashSet};
 use std::path::PathBuf;
 
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 /// A single interface descriptor of a USB device.
-#[derive(Debug, Clone, Default, Serialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, Eq)]
 pub struct UsbInterface {
     /// `bInterfaceNumber`.
     pub number: u32,
@@ -28,7 +28,7 @@ pub struct UsbInterface {
 /// Field naming mirrors common sysfs attribute names where possible. All
 /// fields are public so the type is usable as a builder for tests and for
 /// alternative backends.
-#[derive(Debug, Clone, Default, Serialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, Eq)]
 pub struct UsbDevice {
     /// Absolute sysfs path of the device directory.
     pub sysfs_path: PathBuf,

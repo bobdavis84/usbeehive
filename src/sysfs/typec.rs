@@ -87,6 +87,9 @@ fn read_ucsi_power_supply(
         name,
         online: reader::read_int(psy_path.join("online")).unwrap_or(0) != 0,
         voltage_now_uv: reader::read_int(psy_path.join("voltage_now")),
+        // This path is specifically the UCSI driver's `ucsi-source-psy-*`;
+        // in PD mode its current_now is rdo_op_current (drivers/usb/typec/ucsi/psy.c),
+        // not a generic instantaneous-current measurement.
         current_now_ua: reader::read_int(psy_path.join("current_now")),
         current_max_ua: reader::read_int(psy_path.join("current_max")),
         voltage_min_uv: reader::read_int(psy_path.join("voltage_min")),
@@ -215,27 +218,53 @@ fn read_altmodes(port_dir: &Path, prefix: &str) -> Vec<TypeCAltMode> {
     };
     let needle = format!("{prefix}.");
     let mut out = Vec::new();
-    for sub in reader::subdirs(parent) {
+    let mut seen = std::collections::HashSet::new();
+    for sub in reader::subdirs(parent)
+        .into_iter()
+        .chain(reader::subdirs(parent.join(prefix)))
+    {
         let Some(name) = sub.file_name().and_then(|n| n.to_str()) else {
             continue;
         };
         let Some(tail) = name.strip_prefix(&needle) else {
             continue;
         };
-        if !tail.bytes().all(|b| b.is_ascii_digit()) {
+        if tail.is_empty()
+            || !tail.bytes().all(|b| b.is_ascii_digit())
+            || !seen.insert(name.to_owned())
+        {
             continue;
         }
         let Some(svid) = reader::read_hex(sub.join("svid")) else {
             continue;
         };
         let mode = reader::read_int(sub.join("mode")).unwrap_or(0) as u32;
-        let active = reader::read_attr(sub.join("active"))
-            .map(|s| matches!(s.as_str(), "yes" | "1"))
-            .unwrap_or(false);
+        let reported_active =
+            reader::read_attr(sub.join("active")).and_then(|s| match s.as_str() {
+                "yes" | "1" => Some(true),
+                "no" | "0" => Some(false),
+                _ => None,
+            });
+        let active = reported_active.unwrap_or(false);
+        let pin_assignment =
+            reader::read_attr(sub.join("displayport/pin_assignment")).and_then(|s| {
+                let selected = if let Some((_, rest)) = s.split_once('[') {
+                    rest.split_once(']')?.0
+                } else {
+                    s.trim()
+                };
+                (selected.len() == 1 && selected.bytes().all(|b| (b'A'..=b'F').contains(&b)))
+                    .then(|| selected.to_owned())
+            });
         out.push(TypeCAltMode {
             svid: (svid & 0xFFFF) as u16,
             mode,
             active,
+            reported_active,
+            pin_assignment,
+            // Honest absence: a missing/unreadable `vdo` stays `None`.
+            vdo: reader::read_hex(sub.join("vdo")),
+            description: reader::read_attr(sub.join("description")).filter(|s| !s.is_empty()),
         });
     }
     out

@@ -101,6 +101,12 @@ cargo test                          # full suite, requires libudev-dev (98 tests
 cargo test --no-default-features    # decoders only, no libudev (50 tests)
 ```
 
+The standalone React/TypeScript component lives in `ui/`. Its verified commands
+are `cd ui && npm ci`, `npm test`, and `npm run typecheck`. Tests consume the
+sanitized root `mock-data-dbus.json`; see `docs/MOCK_DATA.md`. No live frontend
+D-Bus or Rust-library integration is implemented. `npm run typecheck` covers
+both the component and its tests.
+
 Manual smoke tests:
 
 - `./target/debug/usbeehive`

@@ -12,7 +12,7 @@
 use std::collections::BTreeMap;
 use std::path::PathBuf;
 
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 /// One entry under `/sys/bus/thunderbolt/devices/`.
 ///
@@ -20,7 +20,7 @@ use serde::Serialize;
 /// here. Host adapters carry a `-0` route suffix (`0-0`, `1-0`, …) and
 /// represent the local controller; non-host routers are devices reachable
 /// through the host (`0-1`, `0-1-1`, …).
-#[derive(Debug, Clone, Default, Serialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, Eq)]
 pub struct ThunderboltRouter {
     /// Absolute sysfs path of the router directory.
     pub sysfs_path: PathBuf,
@@ -33,6 +33,10 @@ pub struct ThunderboltRouter {
     /// Router generation. `1` = original Thunderbolt, `2` = TBT2, `3` = TBT3,
     /// `4` = USB4 (Intel markets this as Thunderbolt 4). `0` when unreadable.
     pub generation: u8,
+    /// Actual readable generation; `None` for missing, invalid, or zero.
+    /// The legacy `generation` field retains its numeric zero sentinel.
+    #[serde(default)]
+    pub reported_generation: Option<u8>,
     /// Vendor ID from the `vendor` attribute.
     pub vendor_id: u16,
     /// Device ID from the `device` attribute.
@@ -45,6 +49,72 @@ pub struct ThunderboltRouter {
     pub unique_id: String,
     /// All regular files under the router directory.
     pub raw_attributes: BTreeMap<String, String>,
+    /// `authorized` attribute: `Some(true)` once the router has been
+    /// authorized for PCIe tunnelling. `None` when the attribute is absent
+    /// or unparseable (it is not exposed on every kernel / router type).
+    #[serde(default)]
+    pub authorized: Option<bool>,
+    /// `nvm_version` attribute (e.g. `"61.0"`), `None` when not published.
+    #[serde(default)]
+    pub nvm_version: Option<String>,
+    /// Receive link speed in **Gb/s** per lane from `rx_speed`. `None`
+    /// when the attribute is absent (host routers have no upstream link).
+    #[serde(default)]
+    pub rx_speed_gbps: Option<u32>,
+    /// Receive lane count from `rx_lanes`. `None` when not published.
+    #[serde(default)]
+    pub rx_lanes: Option<u8>,
+    /// Transmit link speed in **Gb/s** per lane from `tx_speed`.
+    #[serde(default)]
+    pub tx_speed_gbps: Option<u32>,
+    /// Transmit lane count from `tx_lanes`.
+    #[serde(default)]
+    pub tx_lanes: Option<u8>,
+}
+
+/// One Thunderbolt / USB4 *domain* (`domainN` under
+/// `/sys/bus/thunderbolt/devices/`).
+///
+/// The domain carries the controller-wide security level, which decides
+/// which tunnel types the firmware/kernel will set up. The kernel does not
+/// export live per-tunnel state through sysfs, so this is the closest
+/// "tunnel features" signal available without debugfs.
+#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, Eq)]
+pub struct ThunderboltDomain {
+    /// Directory name, e.g. `"domain0"`.
+    pub name: String,
+    /// Numeric domain index parsed from `name`.
+    pub domain: u32,
+    /// Raw `security` attribute (`none`, `user`, `secure`, `dponly`,
+    /// `usbonly`, `nopcie`, …). `None` when absent.
+    #[serde(default)]
+    pub security: Option<String>,
+    /// `iommu_dma_protection`: `Some(true)` when the platform reports
+    /// IOMMU-based DMA protection for this domain. `None` when absent.
+    #[serde(default)]
+    pub iommu_dma_protection: Option<bool>,
+    /// `deauthorization`: `Some(true)` when the kernel supports revoking
+    /// authorization. `None` when absent.
+    #[serde(default)]
+    pub deauthorization: Option<bool>,
+}
+
+/// Parse a Thunderbolt link-speed attribute such as `"20.0 Gb/s"` into whole
+/// Gb/s per lane.
+///
+/// Returns `None` for malformed or fractional values which cannot be represented
+/// exactly as whole Gb/s; never silently truncates a reading.
+pub fn parse_speed_gbps(raw: &str) -> Option<u32> {
+    let value = raw.trim().strip_suffix("Gb/s").unwrap_or(raw.trim()).trim();
+    let (whole, fraction) = value.split_once('.').unwrap_or((value, "0"));
+    if whole.is_empty()
+        || !whole.bytes().all(|b| b.is_ascii_digit())
+        || fraction.is_empty()
+        || !fraction.bytes().all(|b| b == b'0')
+    {
+        return None;
+    }
+    whole.parse().ok()
 }
 
 impl ThunderboltRouter {
@@ -63,11 +133,13 @@ impl ThunderboltRouter {
 /// strongest "USB4 link in use somewhere on this system" signal available
 /// without a separate port-mapping table.
 pub fn system_has_usb4_link(routers: &[ThunderboltRouter]) -> bool {
-    let host_supports = routers.iter().any(|r| r.is_host && r.supports_usb4());
-    if !host_supports {
-        return false;
-    }
-    routers.iter().any(|r| !r.is_host && r.supports_usb4())
+    routers.iter().any(|r| {
+        !r.is_host
+            && r.supports_usb4()
+            && routers
+                .iter()
+                .any(|h| h.is_host && h.domain == r.domain && h.supports_usb4())
+    })
 }
 
 #[cfg(test)]
@@ -81,6 +153,15 @@ mod tests {
             generation,
             ..Default::default()
         }
+    }
+
+    #[test]
+    fn usb4_host_in_another_domain_does_not_prove_a_link() {
+        let mut host = router("0-0", true, 4);
+        host.domain = 0;
+        let mut device = router("1-1", false, 4);
+        device.domain = 1;
+        assert!(!system_has_usb4_link(&[host, device]));
     }
 
     #[test]

@@ -1,0 +1,425 @@
+{
+  "description": "Source-derived serialized Rust type inventory. See SCHEMA.md for JSON mapping, units, presence and stability. Declarations retain field documentation and serde attributes; Rust helper methods are not serialized.",
+  "types": {
+    "usb::UsbInterface": {
+      "kind": "struct",
+      "source": "../src/usb.rs",
+      "attributes": "#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, Eq)]",
+      "declaration": "pub struct UsbInterface {\n    /// `bInterfaceNumber`.\n    pub number: u32,\n    /// `bInterfaceClass`.\n    pub class_code: u8,\n    /// `bInterfaceSubClass`.\n    pub sub_class: u8,\n    /// `bInterfaceProtocol`.\n    pub protocol: u8,\n    /// Driver name bound to this interface (`\"\"` if none).\n    pub driver: String,\n}"
+    },
+    "usb::UsbDevice": {
+      "kind": "struct",
+      "source": "../src/usb.rs",
+      "attributes": "#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, Eq)]",
+      "declaration": "pub struct UsbDevice {\n    /// Absolute sysfs path of the device directory.\n    pub sysfs_path: PathBuf,\n    /// Bus-port identifier as used in sysfs file names (e.g. `\"1-1.4\"`).\n    pub bus_port: String,\n\n    /// `idVendor`.\n    pub vendor_id: u16,\n    /// `idProduct`.\n    pub product_id: u16,\n    /// `manufacturer` string, or `\"\"`.\n    pub manufacturer: String,\n    /// `product` string, or `\"\"`.\n    pub product: String,\n    /// `serial` string, or `\"\"`.\n    pub serial: String,\n\n    /// `version` string (e.g. `\"2.10\"`).\n    pub version: String,\n    /// Negotiated link speed in **Mbps**.\n    pub speed: u32,\n    /// `bMaxPower` \u00d7 2 (i.e. milliamps drawn from the upstream port).\n    pub max_power_ma: u32,\n\n    /// `bDeviceClass`.\n    pub device_class: u8,\n    /// `bDeviceSubClass`.\n    pub device_sub_class: u8,\n    /// `bDeviceProtocol`.\n    pub device_protocol: u8,\n\n    /// `busnum`.\n    pub bus_num: u32,\n    /// `devnum`.\n    pub dev_num: u32,\n    /// SuperSpeed RX-lane count.\n    pub rx_lanes: u32,\n    /// SuperSpeed TX-lane count.\n    pub tx_lanes: u32,\n    /// `removable` attribute (`\"removable\"`, `\"fixed\"`, `\"unknown\"`, `\"\"`).\n    pub removable: String,\n\n    /// `bNumInterfaces`.\n    pub num_interfaces: u32,\n    /// `bNumConfigurations`.\n    pub num_configurations: u32,\n\n    /// Interfaces of the active configuration.\n    pub interfaces: Vec<UsbInterface>,\n    /// Direct children when this device is a hub.\n    pub children: Vec<UsbDevice>,\n\n    /// `device_class == 0x09`.\n    pub is_hub: bool,\n    /// Sysfs name starts with `\"usb\"` (a kernel-synthesized root hub).\n    pub is_root_hub: bool,\n\n    /// Decoded Binary Object Store (`bos_descriptors`), when the device\n    /// publishes one.\n    ///\n    /// `None` is the normal case for USB 2.0-only devices \u2014 the kernel does\n    /// not create the attribute at all. Where `speed` / `rx_lanes` /\n    /// `tx_lanes` report what this link **negotiated**, this reports what the\n    /// device is **capable of**; see [`crate::bos`].\n    #[serde(default)]\n    pub bos: Option<crate::bos::BosDescriptors>,\n\n    /// Kernel per-device quirk bitmask (sysfs `quirks`, hex). Zero when the\n    /// attribute is absent or no quirk applies. See [`USB_QUIRK_NO_BOS`].\n    #[serde(default)]\n    pub quirks: u32,\n\n    /// Basename of the hub-port object this device hangs off \u2014 the target of\n    /// the device's `port` symlink (e.g. `\"usb5-port2\"`, `\"5-2.1-port1\"`).\n    /// Empty when the kernel publishes no `port` link (root hubs, or a\n    /// backend that does not read it).\n    #[serde(default)]\n    pub port_id: String,\n\n    /// Basename of the *companion* root-hub port that shares the same\n    /// physical connector \u2014 the USB 2.0 half of a USB 3.x receptacle, or\n    /// vice versa. Target of `<port>/peer`. Empty when there is none, which\n    /// is the normal case for hub-internal ports.\n    #[serde(default)]\n    pub port_peer_id: String,\n\n    /// The companion port's `state`, verbatim from the kernel\n    /// (`\"not attached\"`, `\"configured\"`, `\"suspended\"`, `\"powered\"`, \u2026).\n    ///\n    /// This is the *why* behind a capability shortfall: a SuperSpeed-capable\n    /// device linked at 480 Mbps whose companion port reads `not attached`\n    /// never trained its SuperSpeed lanes \u2014 a USB 2.0-only cable or\n    /// receptacle. Empty when [`Self::port_peer_id`] is empty or the\n    /// attribute is unreadable.\n    #[serde(default)]\n    pub port_peer_state: String,\n\n    /// This device's own port `connect_type`, verbatim (`\"hotplug\"`,\n    /// `\"hardwired\"`, `\"not used\"`). Empty when unreadable **or** when the\n    /// kernel reports the literal `\"unknown\"`, which it does for every\n    /// hub-internal port.\n    #[serde(default)]\n    pub port_connect_type: String,\n\n    /// `maxchild` \u2014 number of downstream ports. Zero for non-hubs and when\n    /// the attribute is unreadable.\n    #[serde(default)]\n    pub max_child: u32,\n\n    /// Downstream ports of this hub whose `state` is `configured` or\n    /// `suspended` \u2014 i.e. occupied. `None` when this is not a hub or no\n    /// port objects were readable (which is not the same as \"zero used\").\n    #[serde(default)]\n    pub ports_used: Option<u32>,\n\n    /// Active configuration descriptor `bmAttributes`. Bit 6 = self-powered,\n    /// bit 5 = remote wakeup, bit 7 is reserved-and-always-set \u2014 so a value\n    /// of zero means \"not read\", never a valid descriptor.\n    #[serde(default)]\n    pub bm_attributes: u32,\n\n    /// Model name from the udev hardware database (`ID_MODEL_FROM_DATABASE`,\n    /// which hwdb derives from the USB-IF `usb.ids` list). Empty when the\n    /// lookup missed, when the crate was built without the `watch` feature\n    /// (that is where the `udev` dependency lives), or when no udev database\n    /// is present.\n    ///\n    /// Advisory only: it frequently names the *silicon* rather than the\n    /// product (`\"RTS5411 Hub\"` for a device whose `iProduct` says\n    /// `\"4-Port USB 2.0 Hub\"`), which is a capability clue, but it can also\n    /// be stale for re-badged PIDs. Never overrides [`Self::product`].\n    #[serde(default)]\n    pub product_db: String,\n\n    /// Every regular file in the device's sysfs directory, captured for\n    /// `--raw` rendering. Optional: backends may leave this empty.\n    pub raw_attributes: BTreeMap<String, String>,\n}"
+    },
+    "usb::LinkSpeed": {
+      "kind": "enum",
+      "source": "../src/usb.rs",
+      "attributes": "#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]",
+      "declaration": "pub enum LinkSpeed {\n    /// Speed not reported by sysfs.\n    Unknown,\n    /// USB 1.x Low Speed \u2014 1.5 Mbps.\n    Low,\n    /// USB 1.x Full Speed \u2014 12 Mbps.\n    Full,\n    /// USB 2.0 High Speed \u2014 480 Mbps.\n    High,\n    /// USB 3.0 / 3.1 Gen 1 SuperSpeed \u2014 5 Gbps.\n    Super,\n    /// USB 3.1 Gen 2 SuperSpeed+ \u2014 10 Gbps.\n    SuperPlus,\n    /// USB 3.2 Gen 2x2 / USB4 \u2014 20 Gbps.\n    SuperPlus20,\n    /// USB4 \u2014 40 Gbps.\n    Usb4,\n}"
+    },
+    "typec::TypeCIdentity": {
+      "kind": "struct",
+      "source": "../src/typec.rs",
+      "attributes": "#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, Eq)]",
+      "declaration": "pub struct TypeCIdentity {\n    /// Vendor ID extracted from the ID Header VDO.\n    pub vendor_id: u16,\n    /// Product ID extracted from the Product VDO.\n    pub product_id: u16,\n    /// Raw VDO values, in spec order.\n    pub vdos: Vec<u32>,\n}"
+    },
+    "typec::TypeCAltMode": {
+      "kind": "struct",
+      "source": "../src/typec.rs",
+      "attributes": "#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, Eq)]",
+      "declaration": "pub struct TypeCAltMode {\n    /// Standard or Vendor ID \u2014 e.g. `0xFF01` for VESA DisplayPort,\n    /// `0x8087` for Intel Thunderbolt.\n    pub svid: u16,\n    /// Mode index within the SVID (the kernel exposes one row per mode).\n    pub mode: u32,\n    /// `true` when the altmode has been entered (current contract).\n    pub active: bool,\n    /// Readable activity attribute; the legacy bool retains its false default.\n    #[serde(default)]\n    pub reported_active: Option<bool>,\n    /// Selected DP pin assignment when exposed by the DisplayPort driver.\n    #[serde(default)]\n    pub pin_assignment: Option<String>,\n    /// Raw Discover Modes VDO; None when absent or unreadable.\n    #[serde(default)]\n    pub vdo: Option<u32>,\n    /// Kernel description; None when not published.\n    #[serde(default)]\n    pub description: Option<String>,\n}"
+    },
+    "typec::TypeCPartner": {
+      "kind": "struct",
+      "source": "../src/typec.rs",
+      "attributes": "#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, Eq)]",
+      "declaration": "pub struct TypeCPartner {\n    /// Kernel `type` attribute (e.g. `\"upstream\"`, `\"downstream\"`).\n    pub r#type: String,\n    /// Basename of the partner's `usb_power_delivery` symlink target\n    /// (e.g. `\"pd2\"`) \u2014 the kernel's canonical linkage from a port to its\n    /// PD capabilities node. Empty when no PD node is linked.\n    pub pd_name: String,\n    /// Basename of the partner's enumerated USB device child directory (a\n    /// `bus-port` like `\"2-2\"`) \u2014 the kernel's canonical linkage from a\n    /// Type-C partner to its USB device node. Empty when the partner\n    /// enumerates no USB device (e.g. a charger).\n    #[serde(default)]\n    pub usb_name: String,\n    /// Decoded Discover Identity, if the partner advertises one.\n    pub identity: Option<TypeCIdentity>,\n    /// Altmodes advertised by the partner (DisplayPort, Thunderbolt, \u2026).\n    pub altmodes: Vec<TypeCAltMode>,\n    /// Every regular file under the partner sysfs directory.\n    pub raw_attributes: BTreeMap<String, String>,\n}"
+    },
+    "typec::TypeCCable": {
+      "kind": "struct",
+      "source": "../src/typec.rs",
+      "attributes": "#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, Eq)]",
+      "declaration": "pub struct TypeCCable {\n    /// `type` attribute \u2014 `\"passive\"` or `\"active\"`.\n    pub r#type: String,\n    /// `plug_type` attribute (`\"type-c\"`, `\"type-a\"`, \u2026).\n    pub plug_type: String,\n    /// Decoded Discover Identity, if the cable advertises an e-marker.\n    pub identity: Option<TypeCIdentity>,\n    /// Every regular file under the cable sysfs directory.\n    pub raw_attributes: BTreeMap<String, String>,\n}"
+    },
+    "typec::TypeCPowerSupply": {
+      "kind": "struct",
+      "source": "../src/typec.rs",
+      "attributes": "#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, Eq)]",
+      "declaration": "pub struct TypeCPowerSupply {\n    /// Sysfs path of the power-supply directory.\n    pub sysfs_path: PathBuf,\n    /// Power-supply name (basename of `sysfs_path`).\n    pub name: String,\n    /// `online` attribute.\n    pub online: bool,\n    /// `voltage_now` in microvolts.\n    pub voltage_now_uv: Option<i64>,\n    /// `current_now` in microamps.\n    pub current_now_ua: Option<i64>,\n    /// `current_max` in microamps.\n    pub current_max_ua: Option<i64>,\n    /// `voltage_min` in microvolts.\n    pub voltage_min_uv: Option<i64>,\n    /// `voltage_max` in microvolts.\n    pub voltage_max_uv: Option<i64>,\n    /// `charge_type` attribute.\n    pub charge_type: String,\n    /// `usb_type` attribute.\n    pub usb_type: String,\n    /// All regular files under the power-supply directory.\n    pub raw_attributes: BTreeMap<String, String>,\n}"
+    },
+    "typec::TypeCPort": {
+      "kind": "struct",
+      "source": "../src/typec.rs",
+      "attributes": "#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, Eq)]",
+      "declaration": "pub struct TypeCPort {\n    /// Absolute sysfs path of the port directory.\n    pub sysfs_path: PathBuf,\n    /// Kernel-assigned name (e.g. `\"port0\"`).\n    pub port_name: String,\n    /// Numeric port index parsed from `port_name`, or `-1` if unparseable.\n    pub port_number: i32,\n\n    /// Raw `data_role` attribute (e.g. `\"host [device]\"`).\n    pub data_role: String,\n    /// Raw `power_role` attribute (e.g. `\"[source] sink\"`).\n    pub power_role: String,\n    /// `port_type` (DRP / Source-only / \u2026).\n    pub port_type: String,\n    /// `power_operation_mode`.\n    pub power_op_mode: String,\n    /// Plug `orientation` (`normal` / `reverse` / `unknown`).\n    pub orientation: String,\n    /// `usb_power_delivery_revision`.\n    pub pd_revision: String,\n    /// `usb_typec_revision`.\n    pub usb_typec_rev: String,\n    /// Companion UCSI power-supply, if one was located.\n    pub power_supply: Option<TypeCPowerSupply>,\n\n    /// Attached partner, if connected.\n    pub partner: Option<TypeCPartner>,\n    /// Attached cable, if any.\n    pub cable: Option<TypeCCable>,\n\n    /// All regular files under the port sysfs directory.\n    pub raw_attributes: BTreeMap<String, String>,\n}"
+    },
+    "power::PdoType": {
+      "kind": "enum",
+      "source": "../src/power.rs",
+      "attributes": "#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]",
+      "declaration": "pub enum PdoType {\n    /// Fixed-voltage source (the standard 5V / 9V / 15V / 20V profiles).\n    FixedSupply,\n    /// Battery-backed variable voltage.\n    Battery,\n    /// Variable-voltage supply with non-PPS regulation.\n    VariableSupply,\n    /// Programmable Power Supply (USB-PD 3.0 PPS / EPR APDO).\n    Pps,\n    /// Reserved or unrecognised.\n    #[default]\n    Unknown,\n}"
+    },
+    "power::PowerDataObject": {
+      "kind": "struct",
+      "source": "../src/power.rs",
+      "attributes": "#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, Eq)]",
+      "declaration": "pub struct PowerDataObject {\n    /// Type discriminator parsed from the `type` sysfs file.\n    pub r#type: PdoType,\n    /// Voltage in **mV** (or minimum voltage for PPS / variable).\n    pub voltage_mv: u32,\n    /// Maximum voltage in **mV**, only meaningful for PPS / variable supplies.\n    pub max_voltage_mv: u32,\n    /// Maximum current in **mA**.\n    pub current_ma: u32,\n    /// Maximum power in **mW** (`voltage \u00d7 current` if not provided).\n    pub power_mw: u32,\n    /// `true` if this PDO is the currently negotiated contract.\n    pub is_active: bool,\n    /// PDO index in the source/sink capabilities array.\n    pub index: u32,\n}"
+    },
+    "power::PowerDeliveryPort": {
+      "kind": "struct",
+      "source": "../src/power.rs",
+      "attributes": "#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]",
+      "declaration": "pub struct PowerDeliveryPort {\n    /// Absolute sysfs path of the port directory.\n    pub sysfs_path: PathBuf,\n    /// Sysfs name (e.g. `\"pd0\"`).\n    pub name: String,\n    /// Companion Type-C port type, when published as a `parent_port` attribute.\n    pub parent_port_type: String,\n    /// Companion Type-C port number, or `-1` if not linked.\n    pub parent_port_number: i32,\n\n    /// Source PDOs (what we can deliver as a source / what a charger advertises).\n    pub source_capabilities: Vec<PowerDataObject>,\n    /// Sink PDOs (what the partner is willing to accept).\n    pub sink_capabilities: Vec<PowerDataObject>,\n    /// Highest `power_mw` across `source_capabilities`.\n    pub max_source_power_mw: u32,\n    /// Index of the active source PDO, if any.\n    pub active_source_pdo_index: Option<u32>,\n\n    /// All regular files under the port directory.\n    pub raw_attributes: BTreeMap<String, String>,\n}"
+    },
+    "bos::Usb2Extension": {
+      "kind": "struct",
+      "source": "../src/bos.rs",
+      "attributes": "#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]",
+      "declaration": "pub struct Usb2Extension {\n    /// Raw `bmAttributes` (little-endian u32) as published.\n    pub bm_attributes: u32,\n    /// Bit 1 \u2014 Link Power Management supported.\n    pub lpm: bool,\n    /// Bit 2 \u2014 BESL and Alternate HIRD definitions supported.\n    pub besl: bool,\n    /// Bit 3 \u2014 the `baseline_besl` field carries a valid value.\n    pub baseline_besl_valid: bool,\n    /// Bit 4 \u2014 the `deep_besl` field carries a valid value.\n    pub deep_besl_valid: bool,\n    /// Bits 11:8 \u2014 recommended Baseline BESL value.\n    pub baseline_besl: u8,\n    /// Bits 15:12 \u2014 recommended Deep BESL value.\n    pub deep_besl: u8,\n}"
+    },
+    "bos::SuperSpeedCapability": {
+      "kind": "struct",
+      "source": "../src/bos.rs",
+      "attributes": "#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]",
+      "declaration": "pub struct SuperSpeedCapability {\n    /// `bmAttributes` bit 1 \u2014 Latency Tolerance Messaging capable.\n    pub ltm_capable: bool,\n    /// Raw `wSpeedsSupported` bitmap. Bit 0 = low, 1 = full, 2 = high,\n    /// 3 = SuperSpeed Gen 1 x1.\n    pub speeds_supported: u16,\n    /// `bFunctionalitySupport` \u2014 the **bit position** in `speeds_supported`\n    /// of the lowest speed at which all device functionality is available.\n    pub functionality_support: u8,\n    /// `bU1DevExitLat`, in microseconds.\n    pub u1_dev_exit_lat_us: u8,\n    /// `wU2DevExitLat`, in microseconds.\n    pub u2_dev_exit_lat_us: u16,\n}"
+    },
+    "bos::LaneSpeedExponent": {
+      "kind": "enum",
+      "source": "../src/bos.rs",
+      "attributes": "#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]",
+      "declaration": "pub enum LaneSpeedExponent {\n    /// Mantissa is in bits per second.\n    Bps,\n    /// Mantissa is in kilobits per second.\n    Kbps,\n    /// Mantissa is in megabits per second.\n    Mbps,\n    /// Mantissa is in gigabits per second.\n    Gbps,\n}"
+    },
+    "bos::SublinkType": {
+      "kind": "enum",
+      "source": "../src/bos.rs",
+      "attributes": "#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]",
+      "declaration": "pub enum SublinkType {\n    /// Symmetric link, receive direction.\n    SymmetricRx,\n    /// Symmetric link, transmit direction.\n    SymmetricTx,\n    /// Asymmetric link, receive direction.\n    AsymmetricRx,\n    /// Asymmetric link, transmit direction.\n    AsymmetricTx,\n}"
+    },
+    "bos::LinkProtocol": {
+      "kind": "enum",
+      "source": "../src/bos.rs",
+      "attributes": "#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]",
+      "declaration": "pub enum LinkProtocol {\n    /// SuperSpeed (Gen 1 signalling).\n    SuperSpeed,\n    /// SuperSpeedPlus (Gen 2 and later signalling).\n    SuperSpeedPlus,\n    /// Reserved encoding this decoder does not recognise.\n    Reserved(u8),\n}"
+    },
+    "bos::SublinkSpeedAttribute": {
+      "kind": "struct",
+      "source": "../src/bos.rs",
+      "attributes": "#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]",
+      "declaration": "pub struct SublinkSpeedAttribute {\n    /// Bits 3:0 \u2014 Sublink Speed Attribute ID, referenced by\n    /// [`SuperSpeedPlusCapability::min_functional_ssid`] and by the pairing\n    /// of Rx/Tx entries.\n    pub ssid: u8,\n    /// Bits 5:4 \u2014 Lane Speed Exponent.\n    pub exponent: LaneSpeedExponent,\n    /// Bits 7:6 \u2014 Sublink Type (direction + symmetry).\n    pub sublink_type: SublinkType,\n    /// Bits 15:14 \u2014 Link Protocol.\n    pub protocol: LinkProtocol,\n    /// Bits 31:16 \u2014 Lane Speed Mantissa.\n    pub mantissa: u16,\n}"
+    },
+    "bos::SuperSpeedPlusCapability": {
+      "kind": "struct",
+      "source": "../src/bos.rs",
+      "attributes": "#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]",
+      "declaration": "pub struct SuperSpeedPlusCapability {\n    /// `bmAttributes` bits 4:0 (`SSAC`) **+ 1** \u2014 the number of entries the\n    /// descriptor claims for `sublink_attrs`.\n    pub sublink_speed_attr_count: u8,\n    /// `bmAttributes` bits 8:5 (`SSIC`) **+ 1** \u2014 the number of distinct\n    /// Sublink Speed IDs used.\n    pub sublink_speed_id_count: u8,\n    /// `wFunctionalitySupport` bits 3:0 \u2014 the `ssid` of the lowest sublink\n    /// speed needed for full device functionality.\n    pub min_functional_ssid: u8,\n    /// `wFunctionalitySupport` bits 11:8 \u2014 minimum receive lane count.\n    pub min_rx_lane_count: u8,\n    /// `wFunctionalitySupport` bits 15:12 \u2014 minimum transmit lane count.\n    pub min_tx_lane_count: u8,\n    /// Decoded `bmSublinkSpeedAttr[]`. May hold fewer entries than\n    /// `sublink_speed_attr_count` claims when the blob was truncated.\n    pub sublink_attrs: Vec<SublinkSpeedAttribute>,\n}"
+    },
+    "bos::AltModeState": {
+      "kind": "enum",
+      "source": "../src/bos.rs",
+      "attributes": "#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]",
+      "declaration": "pub enum AltModeState {\n    /// `0b00` \u2014 unspecified error.\n    UnspecifiedError,\n    /// `0b01` \u2014 configuration was never attempted.\n    NotAttempted,\n    /// `0b10` \u2014 configuration was attempted and failed.\n    Unsuccessful,\n    /// `0b11` \u2014 configuration succeeded; the mode is active.\n    Successful,\n}"
+    },
+    "bos::BillboardAltMode": {
+      "kind": "struct",
+      "source": "../src/bos.rs",
+      "attributes": "#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]",
+      "declaration": "pub struct BillboardAltMode {\n    /// Position in the descriptor's alternate-mode array \u2014 the index whose\n    /// 2-bit status was read out of `bmConfigured`.\n    pub index: u8,\n    /// `wSVID` \u2014 Standard or Vendor ID. `0xFF01` is DisplayPort.\n    pub svid: u16,\n    /// `bAlternateOrUSB4Mode` \u2014 the mode index within that SVID.\n    pub mode: u8,\n    /// Configuration state read from `bmConfigured`.\n    pub state: AltModeState,\n}"
+    },
+    "bos::BillboardCapability": {
+      "kind": "struct",
+      "source": "../src/bos.rs",
+      "attributes": "#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]",
+      "declaration": "pub struct BillboardCapability {\n    /// `bNumberOfAlternateOrUSB4Modes` as declared. May exceed\n    /// `alt_modes.len()` when the descriptor was short.\n    pub num_alternate_modes: u8,\n    /// `bPreferredAlternateOrUSB4Mode` \u2014 index into the alternate-mode array.\n    pub preferred_alternate_mode: u8,\n    /// `VCONN Power` field, raw.\n    pub vconn_power: u16,\n    /// `bcdVersion` of the Billboard descriptor.\n    pub bcd_version: u16,\n    /// `bAdditionalFailureInfo`, raw.\n    pub additional_failure_info: u8,\n    /// `bAdditionalFailureInfo` bit 0 \u2014 the device saw no USB-PD\n    /// communication (no PD support on the other end, or PD negotiation\n    /// failed). The classic passive-cable / non-PD-port symptom.\n    pub no_usb_pd_communication: bool,\n    /// `bAdditionalFailureInfo` bit 1 \u2014 insufficient power / no battery.\n    pub no_battery_power: bool,\n    /// Decoded alternate-mode entries, in descriptor order.\n    pub alt_modes: Vec<BillboardAltMode>,\n}"
+    },
+    "bos::BosCapability": {
+      "kind": "enum",
+      "source": "../src/bos.rs",
+      "attributes": "#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]\n#[serde(tag = \"kind\")]",
+      "declaration": "pub enum BosCapability {\n    /// `0x02` \u2014 USB 2.0 Extension (LPM / BESL).\n    Usb2Extension(Usb2Extension),\n    /// `0x03` \u2014 SuperSpeed USB Device Capability.\n    SuperSpeed(SuperSpeedCapability),\n    /// `0x04` \u2014 Container ID (a 16-byte UUID stable across the device's\n    /// interfaces and across re-enumeration on a different port).\n    ContainerId {\n        /// Raw 16-byte UUID, in descriptor byte order.\n        uuid: [u8; 16],\n    },\n    /// `0x0A` \u2014 SuperSpeedPlus USB Device Capability.\n    SuperSpeedPlus(SuperSpeedPlusCapability),\n    /// `0x0D` \u2014 Billboard capability (alternate-mode status).\n    Billboard(BillboardCapability),\n    /// Any other `bDevCapabilityType`, kept with its payload so nothing is\n    /// silently lost.\n    Other {\n        /// The raw `bDevCapabilityType` byte.\n        cap_type: u8,\n        /// Descriptor bytes after the 3-byte\n        /// `bLength`/`bDescriptorType`/`bDevCapabilityType` prefix.\n        data: Vec<u8>,\n    },\n}"
+    },
+    "bos::BosDescriptors": {
+      "kind": "struct",
+      "source": "../src/bos.rs",
+      "attributes": "#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]",
+      "declaration": "pub struct BosDescriptors {\n    /// `bNumDeviceCaps` as declared by the BOS root descriptor. May exceed\n    /// `capabilities.len()` on a truncated blob.\n    pub num_device_caps: u8,\n    /// `wTotalLength` as declared by the BOS root descriptor.\n    pub total_length: u16,\n    /// Capabilities decoded, in descriptor order.\n    pub capabilities: Vec<BosCapability>,\n    /// `true` when the walk stopped early \u2014 the blob ran out, a descriptor\n    /// claimed a length that would overrun it, or a descriptor declared an\n    /// impossible `bLength`. Whatever decoded cleanly is still in\n    /// `capabilities`.\n    pub truncated: bool,\n}"
+    },
+    "bos::DataRateVerdict": {
+      "kind": "enum",
+      "source": "../src/bos.rs",
+      "attributes": "#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]",
+      "declaration": "pub enum DataRateVerdict {\n    /// The link negotiated at (or above) everything the device advertises.\n    AtCapability,\n    /// The link is slower than the device's advertised maximum, but at or\n    /// above the vendor's own declared floor for full functionality \u2014 or the\n    /// vendor declared no floor at all. Informational: the device may be\n    /// perfectly happy here, so this is **never** a warning.\n    BelowCapability,\n    /// The link negotiated **below the vendor's own declared floor for full\n    /// functionality**. The device is not getting what its maker says it\n    /// needs \u2014 the clear \"wrong port / wrong cable\" case.\n    Degraded,\n    /// Not enough information \u2014 no BOS, no speed-bearing capability in it,\n    /// or the negotiated speed is unknown.\n    Unknown,\n}"
+    },
+    "bos::DataRateAssessment": {
+      "kind": "struct",
+      "source": "../src/bos.rs",
+      "attributes": "#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]",
+      "declaration": "pub struct DataRateAssessment {\n    /// Categorical verdict.\n    pub verdict: DataRateVerdict,\n    /// Speed the link actually negotiated, in Mbps (sysfs `speed`).\n    pub negotiated_mbps: u32,\n    /// Highest aggregate rate the device advertises, in Mbps. Zero when the\n    /// BOS carries no speed-bearing capability.\n    pub capable_mbps: u32,\n    /// The vendor's declared floor for full functionality, in Mbps. Zero\n    /// when the device declares none.\n    pub functional_floor_mbps: u32,\n    /// USB-IF generation label for the advertised capability, `\"\"` when not\n    /// derivable (e.g. no SuperSpeedPlus capability).\n    pub capable_gen: String,\n    /// One-line headline, English prose.\n    pub summary: String,\n    /// Optional second-line detail, English prose. `\"\"` when there is\n    /// nothing more to say.\n    pub detail: String,\n    /// `true` only for [`DataRateVerdict::Degraded`]. Conservative by\n    /// design: a device that declares full functionality at the speed it\n    /// negotiated is never a warning, even when it advertises more.\n    pub is_warning: bool,\n}"
+    },
+    "pd::ProductType": {
+      "kind": "enum",
+      "source": "../src/pd.rs",
+      "attributes": "#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]",
+      "declaration": "pub enum ProductType {\n    /// Field absent or reserved.\n    #[default]\n    Undefined,\n    /// USB hub.\n    Hub,\n    /// USB peripheral (storage, HID, audio, \u2026).\n    Peripheral,\n    /// Passive USB-C cable assembly.\n    PassiveCable,\n    /// Active USB-C cable assembly (powered re-driver / re-timer).\n    ActiveCable,\n    /// Alternate Mode Adapter (AMA).\n    Ama,\n    /// VCONN-Powered Device (VPD).\n    Vpd,\n    /// Reserved or vendor-specific value not interpreted.\n    Other,\n}"
+    },
+    "pd::CableSpeed": {
+      "kind": "enum",
+      "source": "../src/pd.rs",
+      "attributes": "#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]",
+      "declaration": "pub enum CableSpeed {\n    /// USB 2.0 (480 Mbps), or no SuperSpeed support advertised.\n    Usb20,\n    /// USB 3.2 Gen 1 \u2014 5 Gbps single lane.\n    Usb32Gen1,\n    /// USB 3.2 Gen 2 \u2014 10 Gbps single lane.\n    Usb32Gen2,\n    /// USB4 Gen 3 \u2014 20 Gbps single lane / 40 Gbps dual lane.\n    Usb4Gen3,\n    /// USB4 Gen 4 \u2014 40 Gbps single lane / 80 Gbps dual lane.\n    Usb4Gen4,\n}"
+    },
+    "pd::CableCurrent": {
+      "kind": "enum",
+      "source": "../src/pd.rs",
+      "attributes": "#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]",
+      "declaration": "pub enum CableCurrent {\n    /// USB Default \u2014 only nominal 5V @ 0.9A guaranteed.\n    UsbDefault,\n    /// 3 A rating (60W at 20V VBUS).\n    ThreeAmp,\n    /// 5 A rating (100W at 20V, 240W at 48V).\n    FiveAmp,\n}"
+    },
+    "thunderbolt::ThunderboltRouter": {
+      "kind": "struct",
+      "source": "../src/thunderbolt.rs",
+      "attributes": "#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, Eq)]",
+      "declaration": "pub struct ThunderboltRouter {\n    /// Absolute sysfs path of the router directory.\n    pub sysfs_path: PathBuf,\n    /// Kernel-assigned route string (e.g. `\"0-0\"`, `\"0-1\"`, `\"0-1-1\"`).\n    pub route: String,\n    /// Numeric domain index parsed from the route prefix.\n    pub domain: u32,\n    /// `true` when this router is a host adapter (route ends with `-0`).\n    pub is_host: bool,\n    /// Router generation. `1` = original Thunderbolt, `2` = TBT2, `3` = TBT3,\n    /// `4` = USB4 (Intel markets this as Thunderbolt 4). `0` when unreadable.\n    pub generation: u8,\n    /// Vendor ID from the `vendor` attribute.\n    pub vendor_id: u16,\n    /// Device ID from the `device` attribute.\n    pub device_id: u16,\n    /// `vendor_name` attribute.\n    pub vendor_name: String,\n    /// `device_name` attribute.\n    pub device_name: String,\n    /// `unique_id` attribute \u2014 stable across reboots.\n    pub unique_id: String,\n    /// All regular files under the router directory.\n    pub raw_attributes: BTreeMap<String, String>,\n}"
+    },
+    "cable::CableTrust": {
+      "kind": "struct",
+      "source": "../src/cable.rs",
+      "attributes": "#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, Eq)]",
+      "declaration": "pub struct CableTrust {\n    /// `true` when the cable's ID Header VDO reports a vendor ID of zero.\n    /// USB-IF certified e-markers always carry a registered VID.\n    pub zero_vid: bool,\n    /// `true` when the vendor ID is non-zero but isn't in the bundled\n    /// USB-IF vendor database (i.e. [`vendor::lookup`] fell back to a hex\n    /// string).\n    pub vid_unknown: bool,\n    /// `true` when the raw Cable VDO or ID Header sets bits that USB-PD R3.x defines\n    /// as reserved (see [`cable_vdo_reserved_bits_set`] and [`id_header_reserved_bits_set`]).\n    pub reserved_bits_set: bool,\n\n    /// Categorical trust assessment level.\n    pub trust_level: CableTrustLevel,\n    /// `true` when an active operating contract exceeds the cable's advertised current or voltage.\n    pub emarker_contract_mismatch: bool,\n    /// `true` when unsupported combinations (e.g. EPR voltage on SPR cable) are detected.\n    pub unsupported_combination: bool,\n    /// Contextual notes explaining trust classification and hedging against false positives.\n    pub notes: Vec<String>,\n}"
+    },
+    "cable::CableInfo": {
+      "kind": "struct",
+      "source": "../src/cable.rs",
+      "attributes": "#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, Eq)]",
+      "declaration": "pub struct CableInfo {\n    /// `true` if the cable is electrically active.\n    pub is_active: bool,\n    /// `true` if the cable is passive (plain wires + e-marker).\n    pub is_passive: bool,\n    /// Raw `type` string from sysfs (`\"active\"` / `\"passive\"`).\n    pub cable_type: String,\n    /// Raw `plug_type` string.\n    pub plug_type: String,\n\n    /// Decoded link speed, when a Cable VDO is present.\n    pub speed: Option<CableSpeed>,\n    /// Decoded VBUS current rating.\n    pub current_rating: Option<CableCurrent>,\n    /// `current_rating \u00d7 max_vbus_volts`, as a convenience.\n    pub max_watts: u32,\n\n    /// Cable vendor ID (low 16 bits of the ID Header VDO).\n    pub vendor_id: u16,\n    /// Friendly vendor name (or hex fallback) for `vendor_id`.\n    pub vendor_name: String,\n\n    /// Trust signals derived from the cable's e-marker. See [`CableTrust`].\n    pub trust: CableTrust,\n\n    /// Raw sysfs attributes captured for `--raw` rendering.\n    pub raw_attributes: BTreeMap<String, String>,\n}"
+    },
+    "diagnostic::DiagnosticStatus": {
+      "kind": "enum",
+      "source": "../src/diagnostic.rs",
+      "attributes": "#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]",
+      "declaration": "pub enum DiagnosticStatus {\n    /// Optimal operation; negotiation matches charger capabilities or sink policy.\n    #[default]\n    Healthy,\n    /// Suboptimal throughput (e.g. 60W cable with 100W charger, missing e-marker, underpowered charger).\n    Warning,\n    /// Severe condition, hazard, or protocol violation (e.g. non-compliant contract, >3A on non-e-marked cable).\n    Critical,\n}"
+    },
+    "diagnostic::RootCauseCategory": {
+      "kind": "enum",
+      "source": "../src/diagnostic.rs",
+      "attributes": "#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]",
+      "declaration": "pub enum RootCauseCategory {\n    /// Cable rating, absence of e-marker, or physical cable constraint.\n    Cable,\n    /// Charger advertisement is undersized for host needs or lower than device capability.\n    Charger,\n    /// Device internal policy: battery charge threshold, thermal throttling, or sleep draw.\n    Sink,\n    /// Host port controller hardware limitation or non-PD port mode.\n    Port,\n    /// UCSI firmware anomaly, contract negotiation bug, or safety violation.\n    Firmware,\n    /// No limitation; charging is optimal.\n    #[default]\n    None,\n}"
+    },
+    "diagnostic::DiagnosticConfidence": {
+      "kind": "enum",
+      "source": "../src/diagnostic.rs",
+      "attributes": "#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]",
+      "declaration": "pub enum DiagnosticConfidence {\n    /// Supported by unambiguous direct descriptors (e.g. e-marker VDO + charger PDO).\n    #[default]\n    High,\n    /// Supported by telemetry with known alternative explanations (e.g. pinned 3A draw).\n    Medium,\n    /// Ambiguous telemetry or missing controller readings.\n    Low,\n}"
+    },
+    "diagnostic::Bottleneck": {
+      "kind": "enum",
+      "source": "../src/diagnostic.rs",
+      "attributes": "#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]",
+      "declaration": "pub enum Bottleneck {\n    /// No charger detected (or no source PDOs).\n    NoCharger,\n    /// Charger is offering less than expected.\n    ChargerLimit,\n    /// Cable e-marker advertises lower wattage than the charger can deliver.\n    CableLimit,\n    /// Contract current pinned at 3A while the selected PDO offers more\n    /// and no cable e-marker is visible \u2014 cables without an e-marker are\n    /// limited to 3A by spec.\n    CableNoEMarker,\n    /// The negotiated contract is well below what the charger can deliver.\n    DeviceLimit,\n    /// The contract is healthy but the sink is requesting much less than\n    /// it allows \u2014 typically a battery charge limit or thermal policy on\n    /// the sink side, not a cable or charger problem.\n    SinkLimit,\n    /// Charging is at the charger's maximum.\n    Fine,\n    /// Contract exceeds spec limits (e.g. >3A contract without an e-marked cable).\n    ContractOutOfSpec,\n}"
+    },
+    "diagnostic::ChargingDiagnostic": {
+      "kind": "struct",
+      "source": "../src/diagnostic.rs",
+      "attributes": "#[derive(Debug, Clone, Serialize, PartialEq, Eq)]",
+      "declaration": "pub struct ChargingDiagnostic {\n    /// Categorical bottleneck classification.\n    pub bottleneck: Bottleneck,\n    /// One-line headline (`\"Cable is limiting charging speed\"`).\n    pub summary: String,\n    /// Optional second-line detail.\n    pub detail: String,\n    /// `true` when the bottleneck is user-actionable (i.e. swap the cable).\n    pub is_warning: bool,\n\n    /// Categorical health assessment (`Healthy`, `Warning`, `Critical`).\n    pub status: DiagnosticStatus,\n    /// Subsystem responsible for the observed limitation.\n    pub root_cause: RootCauseCategory,\n    /// Confidence level in this diagnosis.\n    pub confidence: DiagnosticConfidence,\n    /// Actionable plain-English recommendation for the user.\n    pub recommended_action: String,\n    /// Diagnostic rule identifier.\n    #[serde(deserialize_with = \"deserialize_static_str\")]\n    pub rule_id: &'static str,\n}"
+    },
+    "trust::CableTrustLevel": {
+      "kind": "enum",
+      "source": "../src/trust.rs",
+      "attributes": "#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]",
+      "declaration": "pub enum CableTrustLevel {\n    /// Genuine e-marker with registered vendor ID, clean VDO bits, and consistent operation.\n    KnownGood,\n    /// Safe and compliant, but structurally limited (e.g. un-e-marked standard 3A cable).\n    LikelyConstrained,\n    /// Insufficient telemetry (e.g. UCSI controller omitted cable identity node).\n    #[default]\n    Inconclusive,\n    /// Suspicious indicators: zero VID, reserved bits set, or operational contract mismatch.\n    Suspicious,\n}"
+    },
+    "trust::TrustSignal": {
+      "kind": "struct",
+      "source": "../src/trust.rs",
+      "attributes": "#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]",
+      "declaration": "pub struct TrustSignal {\n    /// Machine-readable signal code (e.g. `\"ZERO_VID\"`, `\"RESERVED_BITS_SET\"`).\n    pub code: &'static str,\n    /// Plain-English explanation of what was observed.\n    pub description: String,\n    /// `true` if this signal represents an anomaly or risk.\n    pub is_warning: bool,\n}"
+    },
+    "trust::TrustAssessment": {
+      "kind": "struct",
+      "source": "../src/trust.rs",
+      "attributes": "#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]",
+      "declaration": "pub struct TrustAssessment {\n    /// Overall trust level.\n    pub level: CableTrustLevel,\n    /// Confidence level in this assessment.\n    pub confidence: DiagnosticConfidence,\n    /// Specific positive and negative signals that led to this verdict.\n    pub flags: Vec<TrustSignal>,\n    /// One-line headline summary.\n    pub summary: String,\n    /// Explanatory details and context.\n    pub explanation: String,\n    /// Disclaimers and physical limitations note.\n    pub limitations_note: &'static str,\n}"
+    },
+    "summary::Category": {
+      "kind": "enum",
+      "source": "../src/summary.rs",
+      "attributes": "#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]",
+      "declaration": "pub enum Category {\n    /// Plain USB peripheral.\n    UsbDevice,\n    /// USB Type-C port (with or without a partner attached).\n    TypeCPort,\n    /// USB hub (`device_class == 0x09`).\n    Hub,\n}"
+    },
+    "summary::Status": {
+      "kind": "enum",
+      "source": "../src/summary.rs",
+      "attributes": "#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]",
+      "declaration": "pub enum Status {\n    /// Type-C port with nothing attached.\n    Empty,\n    /// Attached (no active PD contract, or USB device).\n    Connected,\n    /// Attached and we are sinking PD power from this port.\n    Charging,\n    /// Attached and we are sourcing PD power through this port to a\n    /// downstream device (e.g. host charging a phone).\n    Sourcing,\n}"
+    },
+    "summary::DeviceClass": {
+      "kind": "enum",
+      "source": "../src/summary.rs",
+      "attributes": "#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]",
+      "declaration": "pub enum DeviceClass {\n    /// USB-IF HID keyboard.\n    Keyboard,\n    /// USB-IF HID mouse.\n    Mouse,\n    /// HID device with `tablet` / `digitizer` / `pen` in the product name.\n    InputTablet,\n    /// HID device with `gamepad` / `joystick` / `controller` in the product name.\n    Gamepad,\n    /// USB-IF Mass Storage (0x08).\n    Storage,\n    /// USB-IF Video class with display-like product naming. Reserved \u2014\n    /// day-one fidelity is low; unmatched devices fall to [`Self::Unknown`].\n    Display,\n    /// USB-IF Audio (0x01).\n    Audio,\n    /// USB-IF Video (0x0E), camera variant.\n    Camera,\n    /// USB-IF Video (0x0E) with product-string match for capture cards.\n    VideoCapture,\n    /// USB-IF Printer (0x07).\n    Printer,\n    /// iPhones (Apple VID + product) and Android handsets \u2014 detected via\n    /// product-string `android`, ADB/PTP+vendor-class interface signatures,\n    /// or a phone-VID allowlist paired with PTP / MTP-shaped functions.\n    Phone,\n    /// USB-IF Hub (0x09).\n    Hub,\n    /// CDC Ethernet (0x02/0x06) or vendor-specific NIC driver.\n    NetworkWired,\n    /// USB-IF Wireless (0xE0) excluding Bluetooth subclass.\n    NetworkWireless,\n    /// FIDO / U2F / smartcard token (Yubico, Nitrokey, Titan, Solo, \u2026).\n    SecurityKey,\n    /// USB-IF Smart Card / CCID (0x0B).\n    SmartcardReader,\n    /// USB-IF Wireless (0xE0) Radio Frequency subclass 0x01 / protocol 0x01.\n    Bluetooth,\n    /// CDC ACM (0x02/0x02) or vendor-specific USB-UART\n    /// (FTDI, CP210x, CH340/CH341, PL2303, TI, MOS).\n    Serial,\n    /// Fallthrough \u2014 classification could not narrow the device.\n    Unknown,\n}"
+    },
+    "summary::PowerRole": {
+      "kind": "enum",
+      "source": "../src/summary.rs",
+      "attributes": "#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]",
+      "declaration": "pub enum PowerRole {\n    /// We are sourcing power out through this port.\n    Source,\n    /// We are sinking power in through this port (i.e. being charged).\n    Sink,\n    /// Port is dual-role-capable, no active contract.\n    DualRole,\n    /// No PD information.\n    Unknown,\n}"
+    },
+    "summary::PowerSummary": {
+      "kind": "struct",
+      "source": "../src/summary.rs",
+      "attributes": "#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]",
+      "declaration": "pub struct PowerSummary {\n    /// Power the sink requested from this port, in milliwatts. This is\n    /// the RDO operating power (a declared draw ceiling) when the UCSI\n    /// reading is available, falling back to the active / advertised PDO\n    /// power. Zero when not sinking, or for non-PD entries.\n    pub power_in_mw: u32,\n    /// Power flowing out of the host through this port, in milliwatts.\n    /// Zero when not sourcing.\n    pub power_out_mw: u32,\n    /// Maximum power of the *active PDO* \u2014 what the negotiated contract\n    /// allows, in milliwatts. Zero when no active contract could be\n    /// inferred. When `contract_mw > power_in_mw` the sink is asking for\n    /// less than the contract permits (sink-side limit, not cable/port).\n    pub contract_mw: u32,\n    /// Current contract direction (or capability when no contract).\n    pub power_role: PowerRole,\n}"
+    },
+    "summary::DeviceSummary": {
+      "kind": "struct",
+      "source": "../src/summary.rs",
+      "attributes": "#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]",
+      "declaration": "pub struct DeviceSummary {\n    /// High-level grouping for color/iconography.\n    pub category: Category,\n    /// Coarse device classification. [`DeviceClass::Unknown`] when this\n    /// is a [`Category::TypeCPort`] or classification couldn't narrow.\n    pub device_class: DeviceClass,\n    /// Optional fine-grain class hint (`\"webcam\"` / `\"capture\"` /\n    /// `\"sd_reader\"` / \u2026). Advisory only; UIs that don't care ignore it.\n    /// Empty string by default. Never carries security-relevant info.\n    pub device_subclass: String,\n    /// Connection / power flow state.\n    pub status: Status,\n    /// Single-line title (e.g. `\"USB-C Port 0\"` or the product string).\n    pub headline: String,\n    /// Single-line subtitle (vendor + class).\n    pub subtitle: String,\n    /// Suggested freedesktop icon name.\n    pub icon: String,\n    /// USB descriptor `iManufacturer` (or vendor-DB fallback). Empty\n    /// when both fail.\n    pub vendor: String,\n    /// USB descriptor `iProduct`. Empty when unset.\n    pub product: String,\n    /// `idVendor`. Zero for non-USB entries.\n    pub vendor_id: u16,\n    /// `idProduct`. Zero for non-USB entries.\n    pub product_id: u16,\n    /// Kernel driver bound to the device's first interface. Empty when\n    /// no driver is bound \u2014 a meaningful UI signal.\n    pub primary_driver: String,\n    /// `(machine_key, value)` pairs for attributes that don't fit a typed\n    /// field. Adding new keys is non-breaking; renaming or removing is\n    /// breaking. Key vocabulary is daemon-owned and documented in\n    /// CHANGELOG.\n    pub properties: Vec<(String, String)>,\n    /// Negotiated link speed in **Mbps**. Zero when unknown.\n    pub link_speed_mbps: u32,\n    /// Canonical USB version short form (`\"2.0\"`, `\"3.2\"`, `\"4.0\"`).\n    /// Empty when unknown.\n    pub usb_version: String,\n    /// Power flow summary.\n    pub power: PowerSummary,\n    /// Computed charging diagnostic. Present only when the port is\n    /// actively sinking PD power.\n    pub charging_diag: Option<ChargingDiagnostic>,\n    /// Computed **data-rate** assessment \u2014 negotiated link speed versus what\n    /// the device's BOS says it can do. Present only for USB devices that\n    /// published a Binary Object Store; `None` on USB 2.0-only devices and\n    /// on every Type-C port entry.\n    ///\n    /// Deliberately separate from [`Self::charging_diag`]: that one is\n    /// power-side and keyed on Type-C port numbers, this one is data-side\n    /// and keyed on the summary [`Self::id`]. See [`crate::bos`].\n    #[serde(default)]\n    pub data_rate: Option<crate::bos::DataRateAssessment>,\n\n    /// Original USB device, if this summary describes one.\n    pub usb_device: Option<UsbDevice>,\n    /// Original Type-C port, if this summary describes one.\n    pub typec_port: Option<TypeCPort>,\n    /// Companion PD port for `typec_port`.\n    pub power_delivery: Option<PowerDeliveryPort>,\n    /// Decoded cable info attached to `typec_port`.\n    pub cable: Option<CableInfo>,\n}"
+    },
+    "snapshot::SnapshotMetadata": {
+      "kind": "struct",
+      "source": "../src/snapshot.rs",
+      "attributes": "#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]",
+      "declaration": "pub struct SnapshotMetadata {\n    /// Timestamp in milliseconds since UNIX epoch when the snapshot was captured.\n    #[serde(default)]\n    pub captured_at_ms: u64,\n\n    /// Monotonic capture sequence number, useful for ring-buffer state history.\n    #[serde(default)]\n    pub sequence: u64,\n\n    /// Machine identifier, hostname, or data source where the snapshot was captured.\n    #[serde(default)]\n    pub source: String,\n}"
+    },
+    "snapshot::Snapshot": {
+      "kind": "struct",
+      "source": "../src/snapshot.rs",
+      "attributes": "#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]",
+      "declaration": "pub struct Snapshot {\n    /// USB devices observed in the topology.\n    #[serde(default)]\n    pub usb_devices: Vec<UsbDevice>,\n\n    /// Type-C ports observed in the topology.\n    #[serde(default)]\n    pub typec_ports: Vec<TypeCPort>,\n\n    /// USB Power Delivery ports observed in the topology.\n    #[serde(default)]\n    pub pd_ports: Vec<PowerDeliveryPort>,\n\n    /// Thunderbolt / USB4 routers observed in the topology.\n    #[serde(default)]\n    pub thunderbolt_routers: Vec<ThunderboltRouter>,\n\n    /// Plain-English and structured summaries for all discovered devices and ports.\n    #[serde(default)]\n    pub summaries: Vec<DeviceSummary>,\n\n    /// Optional metadata associated with this snapshot capture.\n    #[serde(default, skip_serializing_if = \"Option::is_none\")]\n    pub metadata: Option<SnapshotMetadata>,\n}"
+    },
+    "compare::ValueChange": {
+      "kind": "struct",
+      "source": "../src/compare.rs",
+      "attributes": "#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]",
+      "declaration": "pub struct ValueChange<T> {\n    /// Baseline / previous value.\n    pub from: T,\n    /// Current / after value.\n    pub to: T,\n}"
+    },
+    "compare::SnapshotDiff": {
+      "kind": "struct",
+      "source": "../src/compare.rs",
+      "attributes": "#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Default)]",
+      "declaration": "pub struct SnapshotDiff {\n    /// Devices present in `after` but not in `before`.\n    pub added: Vec<DeviceSummary>,\n    /// Devices present in `before` but not in `after`.\n    pub removed: Vec<DeviceSummary>,\n    /// Devices present in both snapshots that underwent state, power, PD,\n    /// diagnostic, or cable transitions.\n    pub modified: Vec<DeviceDifference>,\n}"
+    },
+    "compare::DeviceDifference": {
+      "kind": "struct",
+      "source": "../src/compare.rs",
+      "attributes": "#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]",
+      "declaration": "pub struct DeviceDifference {\n    /// Stable identifier (e.g. `\"typec:port0\"`, `\"usb:1-1.2\"`).\n    pub id: String,\n    /// Primary headline / product name (e.g. `\"USB-C Port 0\"`, `\"SanDisk Ultra\"`).\n    pub headline: String,\n    /// Subtitle / vendor & class (e.g. `\"Anker 737 Charger\"`, `\"Mass Storage\"`).\n    pub subtitle: String,\n\n    /// Connection / power flow status transition.\n    #[serde(skip_serializing_if = \"Option::is_none\", default)]\n    pub status: Option<ValueChange<Status>>,\n\n    /// Power negotiation and draw transitions.\n    #[serde(skip_serializing_if = \"Option::is_none\", default)]\n    pub power: Option<PowerDifference>,\n\n    /// USB Power Delivery contract and active PDO profile shifts.\n    #[serde(skip_serializing_if = \"Option::is_none\", default)]\n    pub pd_contract: Option<PdContractDifference>,\n\n    /// Negotiated link speed transition in Mbps.\n    #[serde(skip_serializing_if = \"Option::is_none\", default)]\n    pub link_speed_mbps: Option<ValueChange<u32>>,\n\n    /// Charging bottleneck and health diagnostic transitions.\n    #[serde(skip_serializing_if = \"Option::is_none\", default)]\n    pub diagnostic: Option<DiagnosticDifference>,\n\n    /// Cable rating, trust level, and warning transitions.\n    #[serde(skip_serializing_if = \"Option::is_none\", default)]\n    pub cable: Option<CableDifference>,\n\n    /// USB BOS link speed capability versus actual link rate transitions.\n    #[serde(skip_serializing_if = \"Option::is_none\", default)]\n    pub data_rate: Option<DataRateDifference>,\n\n    /// Key-value attribute transitions (`transport.*`, `data_role`, etc.).\n    #[serde(skip_serializing_if = \"Vec::is_empty\", default)]\n    pub property_changes: Vec<PropertyDifference>,\n}"
+    },
+    "compare::PowerDifference": {
+      "kind": "struct",
+      "source": "../src/compare.rs",
+      "attributes": "#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Default)]",
+      "declaration": "pub struct PowerDifference {\n    /// Power sinking into device in milliwatts.\n    #[serde(skip_serializing_if = \"Option::is_none\", default)]\n    pub power_in_mw: Option<ValueChange<u32>>,\n\n    /// Power sourcing out through port in milliwatts.\n    #[serde(skip_serializing_if = \"Option::is_none\", default)]\n    pub power_out_mw: Option<ValueChange<u32>>,\n\n    /// Negotiated active contract ceiling in milliwatts.\n    #[serde(skip_serializing_if = \"Option::is_none\", default)]\n    pub contract_mw: Option<ValueChange<u32>>,\n\n    /// Operating power role (`Sink`, `Source`, `DualRole`, `Unknown`).\n    #[serde(skip_serializing_if = \"Option::is_none\", default)]\n    pub power_role: Option<ValueChange<PowerRole>>,\n\n    /// Plain USB descriptor max power draw in mA (e.g. `500 -> 900`).\n    #[serde(skip_serializing_if = \"Option::is_none\", default)]\n    pub usb_max_power_ma: Option<ValueChange<u32>>,\n}"
+    },
+    "compare::PdContractDifference": {
+      "kind": "struct",
+      "source": "../src/compare.rs",
+      "attributes": "#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Default)]",
+      "declaration": "pub struct PdContractDifference {\n    /// Contract description string (e.g. `\"5.0V @ 3.00A\" -> \"20.0V @ 5.00A\"`).\n    #[serde(skip_serializing_if = \"Option::is_none\", default)]\n    pub contract_string: Option<ValueChange<String>>,\n\n    /// Zero-based index of active PDO in source capability list.\n    #[serde(skip_serializing_if = \"Option::is_none\", default)]\n    pub active_pdo_index: Option<ValueChange<Option<usize>>>,\n\n    /// Contract voltage in millivolts (e.g. `5000 -> 20000`).\n    #[serde(skip_serializing_if = \"Option::is_none\", default)]\n    pub voltage_mv: Option<ValueChange<u32>>,\n\n    /// Contract current in milliamps (e.g. `3000 -> 5000`).\n    #[serde(skip_serializing_if = \"Option::is_none\", default)]\n    pub current_ma: Option<ValueChange<u32>>,\n\n    /// Active contract power in milliwatts (e.g. `15000 -> 100000`).\n    #[serde(skip_serializing_if = \"Option::is_none\", default)]\n    pub max_power_mw: Option<ValueChange<u32>>,\n}"
+    },
+    "compare::DiagnosticDifference": {
+      "kind": "struct",
+      "source": "../src/compare.rs",
+      "attributes": "#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Default)]",
+      "declaration": "pub struct DiagnosticDifference {\n    /// Overall health status (`Healthy`, `Warning`, `Critical`).\n    #[serde(skip_serializing_if = \"Option::is_none\", default)]\n    pub status: Option<ValueChange<DiagnosticStatus>>,\n\n    /// Bottleneck classification (`ChargerLimit`, `CableLimit`, `Fine`, etc.).\n    #[serde(skip_serializing_if = \"Option::is_none\", default)]\n    pub bottleneck: Option<ValueChange<Bottleneck>>,\n\n    /// Warning flag transition (`false -> true` = newly degraded; `true -> false` = resolved).\n    #[serde(skip_serializing_if = \"Option::is_none\", default)]\n    pub is_warning: Option<ValueChange<bool>>,\n\n    /// Subsystem root-cause category (`Cable`, `Charger`, `Sink`, `Port`, `Firmware`, `None`).\n    #[serde(skip_serializing_if = \"Option::is_none\", default)]\n    pub root_cause: Option<ValueChange<RootCauseCategory>>,\n\n    /// Diagnostic explanation text.\n    #[serde(skip_serializing_if = \"Option::is_none\", default)]\n    pub summary: Option<ValueChange<String>>,\n\n    /// Plain-English recommended action.\n    #[serde(skip_serializing_if = \"Option::is_none\", default)]\n    pub recommended_action: Option<ValueChange<Option<String>>>,\n}"
+    },
+    "compare::CableDifference": {
+      "kind": "struct",
+      "source": "../src/compare.rs",
+      "attributes": "#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Default)]",
+      "declaration": "pub struct CableDifference {\n    /// Categorical trust grading (`KnownGood`, `LikelyConstrained`, `Inconclusive`, `Suspicious`).\n    #[serde(skip_serializing_if = \"Option::is_none\", default)]\n    pub trust_level: Option<ValueChange<CableTrustLevel>>,\n\n    /// Flag indicating suspicious markers (zero VID, reserved bits, contract mismatch).\n    #[serde(skip_serializing_if = \"Option::is_none\", default)]\n    pub is_suspicious: Option<ValueChange<bool>>,\n\n    /// Maximum wattage rating (e.g. `60 -> 100`, or `None -> Some(100)`).\n    #[serde(skip_serializing_if = \"Option::is_none\", default)]\n    pub max_watts: Option<ValueChange<Option<u32>>>,\n\n    /// Maximum current rating (`ThreeAmp`, `FiveAmp`).\n    #[serde(skip_serializing_if = \"Option::is_none\", default)]\n    pub current_rating: Option<ValueChange<Option<CableCurrent>>>,\n\n    /// High-speed data rating.\n    #[serde(skip_serializing_if = \"Option::is_none\", default)]\n    pub speed: Option<ValueChange<Option<CableSpeed>>>,\n\n    /// Trust notes newly added in `after`.\n    #[serde(skip_serializing_if = \"Vec::is_empty\", default)]\n    pub notes_added: Vec<String>,\n    /// Trust notes cleared in `after`.\n    #[serde(skip_serializing_if = \"Vec::is_empty\", default)]\n    pub notes_removed: Vec<String>,\n}"
+    },
+    "compare::DataRateDifference": {
+      "kind": "struct",
+      "source": "../src/compare.rs",
+      "attributes": "#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Default)]",
+      "declaration": "pub struct DataRateDifference {\n    /// Assessment verdict (`Optimal`, `CapabilityDegraded`, `SuppressedByQuirk`, `Unknown`).\n    #[serde(skip_serializing_if = \"Option::is_none\", default)]\n    pub verdict: Option<ValueChange<DataRateVerdict>>,\n    /// Shortfall warning flag transition.\n    #[serde(skip_serializing_if = \"Option::is_none\", default)]\n    pub is_warning: Option<ValueChange<bool>>,\n}"
+    },
+    "compare::PropertyDifference": {
+      "kind": "struct",
+      "source": "../src/compare.rs",
+      "attributes": "#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]",
+      "declaration": "pub struct PropertyDifference {\n    /// Machine property key (e.g. `\"transport.usb4\"`, `\"data_role\"`).\n    pub key: String,\n    /// Property value transition (`None` if absent).\n    pub change: ValueChange<Option<String>>,\n}"
+    },
+    "history::SnapshotHistory": {
+      "kind": "struct",
+      "source": "../src/history.rs",
+      "attributes": "#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]",
+      "declaration": "pub struct SnapshotHistory {\n    /// Maximum number of snapshot entries retained.\n    capacity: usize,\n    /// Total number of snapshots pushed since initialization (survives eviction).\n    total_pushed: u64,\n    /// Retained historical entries.\n    entries: VecDeque<HistoryEntry>,\n}"
+    },
+    "history::HistoryEntry": {
+      "kind": "struct",
+      "source": "../src/history.rs",
+      "attributes": "#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]",
+      "declaration": "pub struct HistoryEntry {\n    /// Monotonic sequence number (0, 1, 2, ...).\n    pub sequence: u64,\n    /// Timestamp in milliseconds (typically UNIX epoch millis).\n    pub timestamp_ms: u64,\n    /// Optional human-readable timestamp string (e.g. ISO 8601).\n    #[serde(default, skip_serializing_if = \"Option::is_none\")]\n    pub timestamp_str: Option<String>,\n    /// System snapshot at this timestamp.\n    pub snapshot: Snapshot,\n    /// Discrete state transitions detected relative to the previous snapshot.\n    pub transitions: Vec<StateTransition>,\n}"
+    },
+    "history::TimelineEntry": {
+      "kind": "struct",
+      "source": "../src/history.rs",
+      "attributes": "#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]",
+      "declaration": "pub struct TimelineEntry {\n    /// Monotonic sequence index of the originating snapshot.\n    pub sequence: u64,\n    /// Timestamp in milliseconds.\n    pub timestamp_ms: u64,\n    /// Optional human-readable timestamp string.\n    #[serde(default, skip_serializing_if = \"Option::is_none\")]\n    pub timestamp_str: Option<String>,\n    /// State transition event that occurred.\n    pub transition: StateTransition,\n}"
+    },
+    "history::StateTransition": {
+      "kind": "enum",
+      "source": "../src/history.rs",
+      "attributes": "#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]\n#[serde(tag = \"transition_type\", content = \"details\")]",
+      "declaration": "pub enum StateTransition {\n    /// A new USB device or Type-C port summary appeared.\n    DeviceConnected(DeviceConnectedEvent),\n    /// A USB device or Type-C port summary disappeared.\n    DeviceDisconnected(DeviceDisconnectedEvent),\n    /// The negotiated link speed of a connected device changed.\n    LinkSpeedChanged(LinkSpeedChangedEvent),\n    /// Negotiated power, contract wattage, or draw ceiling changed.\n    PowerChanged(PowerChangedEvent),\n    /// USB Power Delivery contract renegotiated (voltage, current, or PDO index).\n    ContractRenegotiated(ContractRenegotiatedEvent),\n    /// Charging diagnostic bottleneck or health status changed.\n    BottleneckChanged(BottleneckChangedEvent),\n    /// Cable trust assessment level or cable warning changed.\n    CableWarningChanged(CableWarningChangedEvent),\n    /// Type-C port connection status, data role, or power role changed.\n    PortRoleChanged(PortRoleChangedEvent),\n    /// BOS data-rate verdict changed (e.g. SuperSpeed device running degraded).\n    DataRateChanged(DataRateChangedEvent),\n}"
+    },
+    "history::DeviceConnectedEvent": {
+      "kind": "struct",
+      "source": "../src/history.rs",
+      "attributes": "#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]",
+      "declaration": "pub struct DeviceConnectedEvent {\n    /// Summary identifier (`\"usb:1-1\"`, `\"typec:port0\"`).\n    pub id: String,\n    /// Product headline or port label.\n    pub headline: String,\n    /// Subtitle (vendor + classification).\n    pub subtitle: String,\n    /// Device category (`UsbDevice`, `TypeCPort`, `Hub`).\n    pub category: Category,\n    /// Coarse classification.\n    pub device_class: DeviceClass,\n    /// Vendor ID (0 for Type-C ports).\n    pub vendor_id: u16,\n    /// Product ID (0 for Type-C ports).\n    pub product_id: u16,\n    /// Link speed in Mbps.\n    pub link_speed_mbps: u32,\n    /// Initial port/device status.\n    pub status: Status,\n}"
+    },
+    "history::DeviceDisconnectedEvent": {
+      "kind": "struct",
+      "source": "../src/history.rs",
+      "attributes": "#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]",
+      "declaration": "pub struct DeviceDisconnectedEvent {\n    /// Summary identifier.\n    pub id: String,\n    /// Product headline at the time of disconnection.\n    pub headline: String,\n    /// Category.\n    pub category: Category,\n    /// Device classification.\n    pub device_class: DeviceClass,\n}"
+    },
+    "history::LinkSpeedChangedEvent": {
+      "kind": "struct",
+      "source": "../src/history.rs",
+      "attributes": "#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]",
+      "declaration": "pub struct LinkSpeedChangedEvent {\n    /// Device identifier.\n    pub id: String,\n    /// Product headline.\n    pub headline: String,\n    /// Previous negotiated link speed in Mbps.\n    pub old_speed_mbps: u32,\n    /// New negotiated link speed in Mbps.\n    pub new_speed_mbps: u32,\n}"
+    },
+    "history::PowerChangedEvent": {
+      "kind": "struct",
+      "source": "../src/history.rs",
+      "attributes": "#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]",
+      "declaration": "pub struct PowerChangedEvent {\n    /// Summary identifier.\n    pub id: String,\n    /// Product headline.\n    pub headline: String,\n    /// Power role.\n    pub power_role: PowerRole,\n    /// Previous power in mW.\n    pub old_power_in_mw: u32,\n    /// New power in mW.\n    pub new_power_in_mw: u32,\n    /// Previous sourcing power in mW.\n    pub old_power_out_mw: u32,\n    /// New sourcing power in mW.\n    pub new_power_out_mw: u32,\n    /// Previous contract ceiling in mW.\n    pub old_contract_mw: u32,\n    /// New contract ceiling in mW.\n    pub new_contract_mw: u32,\n}"
+    },
+    "history::ContractRenegotiatedEvent": {
+      "kind": "struct",
+      "source": "../src/history.rs",
+      "attributes": "#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]",
+      "declaration": "pub struct ContractRenegotiatedEvent {\n    /// Port identifier.\n    pub id: String,\n    /// Type-C port number if linked.\n    pub port_number: Option<i32>,\n    /// Previous contract wattage in mW.\n    pub old_power_mw: u32,\n    /// New contract wattage in mW.\n    pub new_power_mw: u32,\n    /// Previous contract voltage in mV.\n    pub old_voltage_mv: u32,\n    /// New contract voltage in mV.\n    pub new_voltage_mv: u32,\n    /// Previous contract current in mA.\n    pub old_current_ma: u32,\n    /// New contract current in mA.\n    pub new_current_ma: u32,\n    /// Previous active PDO index.\n    pub old_pdo_index: Option<u32>,\n    /// New active PDO index.\n    pub new_pdo_index: Option<u32>,\n    /// Previous active PDO type.\n    pub old_pdo_type: Option<PdoType>,\n    /// New active PDO type.\n    pub new_pdo_type: Option<PdoType>,\n}"
+    },
+    "history::BottleneckChangedEvent": {
+      "kind": "struct",
+      "source": "../src/history.rs",
+      "attributes": "#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]",
+      "declaration": "pub struct BottleneckChangedEvent {\n    /// Port identifier.\n    pub id: String,\n    /// Type-C port number if linked.\n    pub port_number: Option<i32>,\n    /// Previous bottleneck categorization.\n    pub old_bottleneck: Option<Bottleneck>,\n    /// New bottleneck categorization.\n    pub new_bottleneck: Option<Bottleneck>,\n    /// Previous diagnostic health status.\n    pub old_status: Option<DiagnosticStatus>,\n    /// New diagnostic health status.\n    pub new_status: Option<DiagnosticStatus>,\n    /// `true` if a new warning was raised.\n    pub warning_raised: bool,\n    /// `true` if a previous warning cleared.\n    pub warning_cleared: bool,\n    /// Subsystem responsible for the bottleneck.\n    pub root_cause: RootCauseCategory,\n    /// Headline summary.\n    pub summary: String,\n    /// Actionable user recommendation.\n    pub recommended_action: Option<String>,\n}"
+    },
+    "history::CableWarningChangedEvent": {
+      "kind": "struct",
+      "source": "../src/history.rs",
+      "attributes": "#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]",
+      "declaration": "pub struct CableWarningChangedEvent {\n    /// Port identifier.\n    pub id: String,\n    /// Port number.\n    pub port_number: Option<i32>,\n    /// Previous cable trust level.\n    pub old_trust_level: Option<CableTrustLevel>,\n    /// New cable trust level.\n    pub new_trust_level: Option<CableTrustLevel>,\n    /// Previous cable max watts.\n    pub old_max_watts: Option<u32>,\n    /// New cable max watts.\n    pub new_max_watts: Option<u32>,\n    /// `true` if a new cable anomaly/warning was detected.\n    pub warning_raised: bool,\n    /// `true` if a previous cable warning cleared.\n    pub warning_cleared: bool,\n    /// Explanatory message.\n    pub reason: String,\n}"
+    },
+    "history::PortRoleChangedEvent": {
+      "kind": "struct",
+      "source": "../src/history.rs",
+      "attributes": "#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]",
+      "declaration": "pub struct PortRoleChangedEvent {\n    /// Port identifier.\n    pub id: String,\n    /// Previous connection status.\n    pub old_status: Status,\n    /// New connection status.\n    pub new_status: Status,\n    /// Previous power role.\n    pub old_power_role: PowerRole,\n    /// New power role.\n    pub new_power_role: PowerRole,\n    /// Previous data role (`\"host\"`, `\"device\"`), if published.\n    pub old_data_role: Option<String>,\n    /// New data role.\n    pub new_data_role: Option<String>,\n}"
+    },
+    "history::DataRateChangedEvent": {
+      "kind": "struct",
+      "source": "../src/history.rs",
+      "attributes": "#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]",
+      "declaration": "pub struct DataRateChangedEvent {\n    /// Device identifier.\n    pub id: String,\n    /// Product headline.\n    pub headline: String,\n    /// Previous BOS rate verdict.\n    pub old_verdict: Option<DataRateVerdict>,\n    /// New BOS rate verdict.\n    pub new_verdict: Option<DataRateVerdict>,\n    /// `true` if data rate newly degraded into a warning state.\n    pub is_warning: bool,\n    /// `true` if data rate warning cleared.\n    pub is_restored: bool,\n}"
+    }
+  }
+}

@@ -6,7 +6,7 @@
 use std::collections::BTreeMap;
 use std::path::PathBuf;
 
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 /// Decoded `Discover Identity` response from a partner or cable.
 ///
@@ -14,7 +14,7 @@ use serde::Serialize;
 /// directory in the order kernels publish them (`id_header`, `cert_stat`,
 /// `product`, then `product_type_vdo1..3` if present), which is the same
 /// order they appear in the USB-PD wire format.
-#[derive(Debug, Clone, Default, Serialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, Eq)]
 pub struct TypeCIdentity {
     /// Vendor ID extracted from the ID Header VDO.
     pub vendor_id: u16,
@@ -27,7 +27,7 @@ pub struct TypeCIdentity {
 /// One alternate-mode entry advertised by a Type-C partner or cable.
 ///
 /// Mirrors a `/sys/class/typec/<port>-{partner,cable}.<n>/` directory.
-#[derive(Debug, Clone, Default, Serialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, Eq)]
 pub struct TypeCAltMode {
     /// Standard or Vendor ID — e.g. `0xFF01` for VESA DisplayPort,
     /// `0x8087` for Intel Thunderbolt.
@@ -36,10 +36,27 @@ pub struct TypeCAltMode {
     pub mode: u32,
     /// `true` when the altmode has been entered (current contract).
     pub active: bool,
+    /// Readable activity attribute; the legacy bool retains its false default.
+    #[serde(default)]
+    pub reported_active: Option<bool>,
+    /// Selected DP pin assignment when exposed by the DisplayPort driver.
+    #[serde(default)]
+    pub pin_assignment: Option<String>,
+    /// Raw mode VDO from the kernel's `vdo` attribute, as advertised in
+    /// the PD *Discover Modes* response. `None` when the attribute is
+    /// missing or unreadable — never a defaulted `0`. For the DisplayPort
+    /// SVID this is the DP Capabilities VDO; see
+    /// [`crate::altmode::decode_dp_capabilities`].
+    #[serde(default)]
+    pub vdo: Option<u32>,
+    /// Free-text `description` attribute (e.g. `"DisplayPort"`). `None`
+    /// when the kernel doesn't publish one.
+    #[serde(default)]
+    pub description: Option<String>,
 }
 
 /// Snapshot of a Type-C **partner** device attached to a port.
-#[derive(Debug, Clone, Default, Serialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, Eq)]
 pub struct TypeCPartner {
     /// Kernel `type` attribute (e.g. `"upstream"`, `"downstream"`).
     pub r#type: String,
@@ -62,7 +79,7 @@ pub struct TypeCPartner {
 }
 
 /// Snapshot of a Type-C **cable** plug attached to a port.
-#[derive(Debug, Clone, Default, Serialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, Eq)]
 pub struct TypeCCable {
     /// `type` attribute — `"passive"` or `"active"`.
     pub r#type: String,
@@ -77,7 +94,7 @@ pub struct TypeCCable {
 /// UCSI power-supply view of an attached Type-C source.
 ///
 /// Mirrors a `/sys/class/power_supply/ucsi-source-psy-USBC*` directory.
-#[derive(Debug, Clone, Default, Serialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, Eq)]
 pub struct TypeCPowerSupply {
     /// Sysfs path of the power-supply directory.
     pub sysfs_path: PathBuf,
@@ -131,7 +148,7 @@ impl TypeCPowerSupply {
 }
 
 /// Snapshot of one entry under `/sys/class/typec/`.
-#[derive(Debug, Clone, Default, Serialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, Eq)]
 pub struct TypeCPort {
     /// Absolute sysfs path of the port directory.
     pub sysfs_path: PathBuf,

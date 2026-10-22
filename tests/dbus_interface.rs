@@ -23,6 +23,100 @@ mod dbus_tests {
         Arc::new(Mutex::new(State::new(mgr)))
     }
 
+    #[test]
+    fn devices5_wire_type_signatures_are_frozen() {
+        use usbeehive::dbus::{DeviceEntry, DiagnosticEntry, PdoEntry, PowerEntry};
+        use zbus::zvariant::Type;
+
+        assert_eq!(PowerEntry::SIGNATURE.to_string(), "(uuus)");
+        assert_eq!(DiagnosticEntry::SIGNATURE.to_string(), "(bsssb)");
+        assert_eq!(PdoEntry::SIGNATURE.to_string(), "(usuuuub)");
+        assert_eq!(
+            DeviceEntry::SIGNATURE.to_string(),
+            "(ssssssssssqqsa(ss)ius(uuus)(bsssb)a(usuuuub)i)"
+        );
+        assert_eq!(
+            Vec::<DeviceEntry>::SIGNATURE.to_string(),
+            "a(ssssssssssqqsa(ss)ius(uuus)(bsssb)a(usuuuub)i)"
+        );
+    }
+
+    #[test]
+    fn devices5_introspection_contract_without_a_bus() {
+        use zbus::object_server::Interface;
+
+        let root = TempRoot::new("dbus-introspection");
+        let iface = DevicesIface {
+            state: make_state(root.path()),
+        };
+        let mut xml = String::new();
+        iface.introspect_to_writer(&mut xml, 0);
+        assert!(xml.contains("interface name=\"org.usbeehive.Devices5\""));
+        for (name, args) in [
+            (
+                "ListDevices",
+                vec![("out", "a(ssssssssssqqsa(ss)ius(uuus)(bsssb)a(usuuuub)i)")],
+            ),
+            ("ListPorts", vec![("out", "ai")]),
+            ("Diagnose", vec![("in", "i"), ("out", "(bsssb)")]),
+            ("SnapshotJson", vec![("out", "s")]),
+            ("Refresh", vec![("out", "u")]),
+        ] {
+            let marker = format!("<method name=\"{name}\">");
+            let body = xml
+                .split_once(&marker)
+                .unwrap_or_else(|| panic!("{name}: {xml}"))
+                .1
+                .split_once("</method>")
+                .unwrap()
+                .0;
+            assert_eq!(body.matches("<arg ").count(), args.len(), "{name}: {body}");
+            for (direction, signature) in args {
+                assert!(
+                    body.lines()
+                        .any(|line| line.contains(&format!("type=\"{signature}\""))
+                            && line.contains(&format!("direction=\"{direction}\""))),
+                    "{name}: {body}"
+                );
+            }
+        }
+        for (name, signatures) in [
+            ("DeviceAdded", vec!["s", "s"]),
+            ("DeviceRemoved", vec!["s"]),
+            ("DeviceChanged", vec!["s"]),
+            ("CapabilityDegraded", vec!["i", "s", "s"]),
+            ("CapabilityRestored", vec!["i"]),
+            ("DataRateDegraded", vec!["s", "s", "s"]),
+            ("DataRateRestored", vec!["s"]),
+        ] {
+            let marker = format!("<signal name=\"{name}\">");
+            let body = xml
+                .split_once(&marker)
+                .unwrap_or_else(|| panic!("{name}: {xml}"))
+                .1
+                .split_once("</signal>")
+                .unwrap()
+                .0;
+            let actual: Vec<_> = body
+                .lines()
+                .filter_map(|line| {
+                    line.split_once("type=\"")
+                        .map(|(_, rest)| rest.split('"').next().unwrap())
+                })
+                .collect();
+            assert_eq!(actual, signatures, "{name}");
+        }
+        for (name, signature) in [("Version", "s"), ("DeviceCount", "u")] {
+            assert!(
+                xml.lines()
+                    .any(|line| line.contains(&format!("property name=\"{name}\""))
+                        && line.contains(&format!("type=\"{signature}\""))
+                        && line.contains("access=\"read\"")),
+                "{xml}"
+            );
+        }
+    }
+
     fn write_port_with_cable_limit(root: &std::path::Path) {
         write_typec_port(
             root,
@@ -145,6 +239,66 @@ mod dbus_tests {
         assert_eq!(e.id, "typec:port0");
         assert_eq!(e.port_number, 0);
         assert!(e.headline.starts_with("USB-C Port"));
+    }
+
+    #[test]
+    fn structured_assessments_project_additively_without_changing_devices5() {
+        let root = TempRoot::new("dbus-assessment-projection");
+        write_port_with_cable_limit(root.path());
+        let state = make_state(root.path());
+        state.lock().unwrap().refresh();
+        let iface = DevicesIface { state };
+        let entries = iface.snapshot_entries();
+        let entry = entries.iter().find(|e| e.id == "typec:port0").unwrap();
+        let json: serde_json::Value =
+            serde_json::from_str(&iface.snapshot_json_string().unwrap()).unwrap();
+        let summary = json
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|s| s["typec_port"]["port_name"] == "port0")
+            .unwrap();
+        let diagnostic = &summary["charging_diag"];
+        let properties: std::collections::HashMap<_, _> = entry
+            .properties
+            .iter()
+            .map(|(k, v)| (k.as_str(), v.as_str()))
+            .collect();
+        for field in [
+            "status",
+            "root_cause",
+            "confidence",
+            "recommended_action",
+            "rule_id",
+        ] {
+            let key = format!("diagnostic.{field}");
+            assert_eq!(
+                properties.get(key.as_str()).copied(),
+                diagnostic[field].as_str(),
+                "{key} must match the structured serde assessment"
+            );
+        }
+        assert_eq!(
+            properties.get("cable.trust.level").copied(),
+            summary["cable"]["trust"]["trust_level"].as_str()
+        );
+        // The old fixed diagnostic struct remains a legacy projection.
+        assert_eq!(
+            entry.charging_diag.summary,
+            diagnostic["summary"].as_str().unwrap()
+        );
+        assert_eq!(
+            entry.charging_diag.bottleneck,
+            diagnostic["bottleneck"].as_str().unwrap()
+        );
+        assert_eq!(
+            entry.charging_diag.is_warning,
+            diagnostic["is_warning"].as_bool().unwrap()
+        );
+        assert_eq!(
+            serde_json::to_value(&entry.properties).unwrap(),
+            summary["properties"]
+        );
     }
 
     #[test]
@@ -468,10 +622,10 @@ mod dbus_tests {
     }
 
     #[test]
-    fn list_devices_emits_transport_usb4_when_link_is_usb4() {
-        // End-to-end wire check: a Type-C port with a partner under a USB4
-        // host (thunderbolt `0-0`, generation 4) and a USB4-capable connected
-        // router (`0-1`, generation 4) must publish `transport.usb4=true`.
+    fn list_devices_does_not_attribute_system_usb4_to_an_uncorrelated_port() {
+        // USB4 routers are not linked back to Type-C ports in sysfs. Keep the
+        // system-wide fact in the opt-in alternate-mode report; do not guess
+        // that this particular partner is using the USB4 link.
         let root = TempRoot::new("dbus-usb4");
         write_typec_port(
             root.path(),
@@ -516,7 +670,7 @@ mod dbus_tests {
             .iter()
             .map(|(k, v)| (k.as_str(), v.as_str()))
             .collect();
-        assert_eq!(p.get("transport.usb4").copied(), Some("true"));
+        assert!(!p.contains_key("transport.usb4"));
     }
 
     #[test]

@@ -135,7 +135,7 @@ pub fn print_text<W: Write>(w: &mut W, mgr: &DeviceManager, show_raw: bool) -> i
     print_text_iter(w, mgr.devices(), show_raw)
 }
 
-fn print_text_iter<W: Write>(
+pub(crate) fn print_text_iter<W: Write>(
     w: &mut W,
     devices: &[DeviceSummary],
     show_raw: bool,
@@ -172,6 +172,12 @@ fn print_text_iter<W: Write>(
         if !dev.primary_driver.is_empty() {
             writeln!(w, "  {DIM}• {RESET}Driver: {}", dev.primary_driver)?;
         }
+        if let Some(cable) = &dev.cable {
+            writeln!(w, "  Cable trust: {:?}", cable.trust.trust_level)?;
+            for note in &cable.trust.notes {
+                writeln!(w, "    {note}")?;
+            }
+        }
         write_power_lines(w, &dev.power)?;
         for (key, value) in &dev.properties {
             // `usb_max_power_ma` is shown in mA — the daemon emits the raw
@@ -179,6 +185,14 @@ fn print_text_iter<W: Write>(
             write_property(w, key, value)?;
         }
         if let Some(diag) = &dev.charging_diag {
+            writeln!(
+                w,
+                "  Assessment: {:?}; confidence: {:?}; root cause: {:?}",
+                diag.status, diag.confidence, diag.root_cause
+            )?;
+            if !diag.recommended_action.is_empty() {
+                writeln!(w, "  Recommendation: {}", diag.recommended_action)?;
+            }
             if diag.is_warning {
                 writeln!(w, "  {YELLOW}⚠ {}{RESET}", diag.summary)?;
             } else {
@@ -271,6 +285,20 @@ pub fn print_tree<W: Write>(w: &mut W, mgr: &DeviceManager) -> io::Result<()> {
 }
 
 fn print_typec_summary<W: Write>(w: &mut W, dev: &DeviceSummary) -> io::Result<()> {
+    if let Some(diag) = &dev.charging_diag {
+        writeln!(
+            w,
+            "  Assessment: {:?}; confidence: {:?}; root cause: {:?}",
+            diag.status, diag.confidence, diag.root_cause
+        )?;
+        if !diag.recommended_action.is_empty() {
+            writeln!(w, "  Recommendation: {}", diag.recommended_action)?;
+        }
+    }
+    if let Some(cable) = &dev.cable {
+        writeln!(w, "  Cable trust: {:?}", cable.trust.trust_level)?;
+    }
+
     writeln!(w, "{BOLD}{CYAN}{}{RESET}", dev.headline)?;
     if !dev.subtitle.is_empty() {
         writeln!(w, "  {}", dev.subtitle)?;
@@ -414,12 +442,16 @@ fn first_class_name(dev: &UsbDevice) -> String {
 
 /// Render the manager's snapshot as pretty-printed JSON.
 pub fn print_json<W: Write>(w: &mut W, mgr: &DeviceManager, show_raw: bool) -> io::Result<()> {
-    let arr: Vec<Value> = mgr
-        .devices()
-        .iter()
-        .map(|d| device_json(d, show_raw))
-        .collect();
-    let s = serde_json::to_string_pretty(&arr).unwrap();
+    print_json_devices(w, mgr.devices(), show_raw)
+}
+
+pub(crate) fn print_json_devices<W: Write>(
+    w: &mut W,
+    devices: &[DeviceSummary],
+    show_raw: bool,
+) -> io::Result<()> {
+    let arr: Vec<Value> = devices.iter().map(|d| device_json(d, show_raw)).collect();
+    let s = serde_json::to_string_pretty(&arr).map_err(io::Error::other)?;
     writeln!(w, "{s}")
 }
 
@@ -643,10 +675,17 @@ pub(crate) fn device_json(dev: &DeviceSummary, show_raw: bool) -> Value {
                 "summary": d.summary,
                 "detail": d.detail,
                 "isWarning": d.is_warning,
+                "status": d.status,
+                "confidence": d.confidence,
+                "rootCause": d.root_cause,
+                "recommendedAction": d.recommended_action,
             }),
         );
     }
 
+    if let Some(cable) = &dev.cable {
+        obj.insert("cableTrust".into(), json!(cable.trust));
+    }
     Value::Object(obj)
 }
 
@@ -655,6 +694,47 @@ mod tests {
     use super::*;
     use usbeehive::summary::Status;
     use usbeehive::usb::UsbDevice;
+
+    #[test]
+    fn structured_diagnostic_and_recommendation_are_visible() {
+        let mut d = DeviceSummary::from_usb_device(&UsbDevice::default());
+        d.charging_diag = Some(usbeehive::diagnostic::ChargingDiagnostic {
+            bottleneck: usbeehive::diagnostic::Bottleneck::Fine,
+            summary: "test".into(),
+            detail: String::new(),
+            is_warning: false,
+            status: Default::default(),
+            root_cause: Default::default(),
+            confidence: Default::default(),
+            recommended_action: "Try another cable".into(),
+            rule_id: "test",
+        });
+        let v = device_json(&d, false);
+        assert_eq!(v["charging"]["recommendedAction"], "Try another cable");
+        assert!(v["charging"].get("confidence").is_some());
+        let mut tree = Vec::new();
+        print_typec_summary(&mut tree, &d).unwrap();
+        assert!(String::from_utf8(tree)
+            .unwrap()
+            .contains("Try another cable"));
+        let mut out = Vec::new();
+        print_text_iter(&mut out, &[d], false).unwrap();
+        assert!(String::from_utf8(out)
+            .unwrap()
+            .contains("Try another cable"));
+    }
+
+    #[test]
+    fn cable_trust_is_visible() {
+        let mut d = DeviceSummary::from_usb_device(&UsbDevice::default());
+        d.cable = Some(usbeehive::cable::CableInfo::from_typec_cable(
+            &Default::default(),
+        ));
+        assert!(device_json(&d, false).get("cableTrust").is_some());
+        let mut out = Vec::new();
+        print_text_iter(&mut out, &[d], false).unwrap();
+        assert!(String::from_utf8(out).unwrap().contains("Cable trust:"));
+    }
 
     #[test]
     fn empty_text_says_no_devices() {
