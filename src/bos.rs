@@ -41,7 +41,7 @@
 //! assert_eq!(bos.functional_floor_mbps(), Some(480));
 //! ```
 
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 /// `bDescriptorType` of the BOS root descriptor.
 const DT_BOS: u8 = 0x0F;
@@ -89,7 +89,7 @@ const SPEED_GEN1_MBPS: u32 = 5_000;
 /// Describes Link Power Management support. Carries no data-rate
 /// information; decoded because it is the most common capability and
 /// swallowing it as `Other` would lose the LPM/BESL detail.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Usb2Extension {
     /// Raw `bmAttributes` (little-endian u32) as published.
     pub bm_attributes: u32,
@@ -127,7 +127,7 @@ impl Usb2Extension {
 /// all", via the `wSpeedsSupported` bitmap, *and* "what is the slowest speed
 /// at which the vendor considers the device fully functional", via
 /// `bFunctionalitySupport`.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct SuperSpeedCapability {
     /// `bmAttributes` bit 1 — Latency Tolerance Messaging capable.
     pub ltm_capable: bool,
@@ -199,7 +199,7 @@ impl SuperSpeedCapability {
 }
 
 /// `LSE` — the exponent applied to a sublink's Lane Speed Mantissa.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum LaneSpeedExponent {
     /// Mantissa is in bits per second.
     Bps,
@@ -224,7 +224,7 @@ impl LaneSpeedExponent {
 
 /// `ST` — whether a sublink speed attribute describes the receive or the
 /// transmit direction, and whether the link is symmetric.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum SublinkType {
     /// Symmetric link, receive direction.
     SymmetricRx,
@@ -260,7 +260,7 @@ impl SublinkType {
 }
 
 /// `LP` — the link protocol a sublink speed attribute applies to.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum LinkProtocol {
     /// SuperSpeed (Gen 1 signalling).
     SuperSpeed,
@@ -286,7 +286,7 @@ impl LinkProtocol {
 /// from Gen 2x1 (one 10 Gbps lane): both aggregate to 10 Gbps and both are
 /// reported as `speed == 10000` by sysfs, but their per-lane mantissa and
 /// lane counts differ.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub struct SublinkSpeedAttribute {
     /// Bits 3:0 — Sublink Speed Attribute ID, referenced by
     /// [`SuperSpeedPlusCapability::min_functional_ssid`] and by the pairing
@@ -329,7 +329,7 @@ impl SublinkSpeedAttribute {
 
 /// Decoded SuperSpeedPlus USB Device Capability
 /// (`bDevCapabilityType == 0x0A`).
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct SuperSpeedPlusCapability {
     /// `bmAttributes` bits 4:0 (`SSAC`) **+ 1** — the number of entries the
     /// descriptor claims for `sublink_attrs`.
@@ -396,7 +396,7 @@ impl SuperSpeedPlusCapability {
 
 /// Configuration state of one Billboard alternate mode, from the 2-bit
 /// field the device publishes in `bmConfigured`.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum AltModeState {
     /// `0b00` — unspecified error.
     UnspecifiedError,
@@ -430,7 +430,7 @@ impl AltModeState {
 }
 
 /// One alternate-mode entry from a Billboard capability.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub struct BillboardAltMode {
     /// Position in the descriptor's alternate-mode array — the index whose
     /// 2-bit status was read out of `bmConfigured`.
@@ -464,7 +464,7 @@ impl BillboardAltMode {
 ///
 /// Defined by the *USB Device Class Definition for Billboard Devices*,
 /// not the core USB spec.
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct BillboardCapability {
     /// `bNumberOfAlternateOrUSB4Modes` as declared. May exceed
     /// `alt_modes.len()` when the descriptor was short.
@@ -529,7 +529,7 @@ impl BillboardCapability {
 /// Unknown `bDevCapabilityType` values are preserved verbatim as
 /// [`BosCapability::Other`] rather than dropped, so a future capability is
 /// still visible to callers (and to `--json` consumers) without a decoder.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "kind")]
 pub enum BosCapability {
     /// `0x02` — USB 2.0 Extension (LPM / BESL).
@@ -572,7 +572,7 @@ impl BosCapability {
 }
 
 /// A device's decoded Binary Object Store.
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct BosDescriptors {
     /// `bNumDeviceCaps` as declared by the BOS root descriptor. May exceed
     /// `capabilities.len()` on a truncated blob.
@@ -704,7 +704,7 @@ impl BosDescriptors {
 /// are entirely power-side and keyed on Type-C port numbers. A data-rate
 /// shortfall on a plain USB device behind a hub has no port number, so it
 /// gets its own vocabulary keyed on the summary `id` string.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum DataRateVerdict {
     /// The link negotiated at (or above) everything the device advertises.
     AtCapability,
@@ -738,7 +738,7 @@ impl DataRateVerdict {
 ///
 /// The data-rate counterpart of [`crate::ChargingDiagnostic`], kept as a
 /// separate type on purpose (see [`DataRateVerdict`]).
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct DataRateAssessment {
     /// Categorical verdict.
     pub verdict: DataRateVerdict,

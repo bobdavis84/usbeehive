@@ -15,7 +15,12 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        features: ["", "--no-default-features"]
+        features:
+          - ""
+          - "--no-default-features"
+          - "--no-default-features --features cli"
+          - "--no-default-features --features dbus"
+          - "--all-features"
 
     steps:
       - uses: actions/checkout@v5
@@ -63,8 +68,18 @@ jobs:
       - name: Clippy
         run: cargo clippy --all-targets -- -D warnings
 
+      - name: Clippy (all features)
+        run: cargo clippy --all-targets --all-features -- -D warnings
+
   msrv:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - rust: '1.85.0'
+            features: ''
+          - rust: '1.87.0'
+            features: '--no-default-features --features dbus'
 
     steps:
       - uses: actions/checkout@v5
@@ -74,10 +89,12 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libudev-dev pkg-config
 
-      - uses: dtolnay/rust-toolchain@1.85
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ matrix.rust }}
 
       - name: Build with MSRV
-        run: cargo build --locked
+        run: cargo build --locked ${{ matrix.features }}
 
   docs:
     runs-on: ubuntu-latest
@@ -96,3 +113,27 @@ jobs:
         env:
           RUSTDOCFLAGS: "-D warnings"
         run: cargo doc --no-deps
+
+      - name: rustdoc (all features)
+        env:
+          RUSTDOCFLAGS: "-D warnings"
+        run: cargo doc --no-deps --all-features
+
+  device-card:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ui
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: ui/package-lock.json
+      - name: Install component dependencies
+        run: npm ci
+      - name: Type check component and tests
+        run: npm run typecheck
+      - name: Test DeviceCard against fixture data
+        run: npm test

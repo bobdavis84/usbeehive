@@ -478,9 +478,9 @@ impl DevicesIface {
         self.diagnose_port(port_number)
     }
 
-    /// Full structured snapshot serialised with `serde_json`. Mirrors the
-    /// CLI's `--json` output so any client can deserialise it without
-    /// re-deriving D-Bus types for every nested field.
+    /// Full structured summary array serialised with `serde_json` (snake_case).
+    /// This is not the legacy camelCase CLI `--json` projection; see
+    /// `docs/SCHEMA.md` for both contracts.
     fn snapshot_json(&self) -> zbus::fdo::Result<String> {
         self.snapshot_json_string()
             .map_err(|e| zbus::fdo::Error::Failed(format!("serde_json: {e}")))
@@ -669,6 +669,7 @@ mod tests {
             summary: "Cable is limiting charging speed".into(),
             detail: "Cable rated for 60W, but charger can deliver 100W".into(),
             is_warning: true,
+            ..Default::default()
         });
         let e = DeviceEntry::from(&s);
         assert!(e.charging_diag.present);

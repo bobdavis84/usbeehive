@@ -290,6 +290,53 @@ pub fn write_thunderbolt_router(
     dir
 }
 
+/// Write a synthetic single-mode Billboard BOS descriptor.
+pub fn write_billboard(root: &Path, bus_port: &str, svid: u16, state: u8, failure: u8) {
+    // Billboard fixed header: 8 bytes + 32-byte bmConfigured + 4 bytes.
+    let mut cap = vec![0u8; 48];
+    cap[0] = 48;
+    cap[1] = 0x10;
+    cap[2] = 0x0d;
+    cap[4] = 1;
+    cap[8] = state & 3;
+    cap[40..42].copy_from_slice(&0x0121u16.to_le_bytes());
+    cap[42] = failure;
+    cap[44..46].copy_from_slice(&svid.to_le_bytes());
+    cap[46] = 1;
+    let mut bos = vec![5, 0x0f, 53, 0, 1];
+    bos.extend(cap);
+    write_bos(root, bus_port, &bos);
+}
+
+/// Write a partner alternate mode, leaving omitted attributes genuinely absent.
+pub fn write_typec_altmode(
+    root: &Path,
+    port: &str,
+    index: u32,
+    fields: &[(&str, &str)],
+) -> PathBuf {
+    let dir = root
+        .join("class/typec")
+        .join(format!("{port}-partner.{index}"));
+    fs::create_dir_all(&dir).unwrap();
+    for (key, value) in fields {
+        write_attr(&dir, key, value);
+    }
+    dir
+}
+
+/// Write a Thunderbolt domain, with optional security and protection attributes.
+pub fn write_thunderbolt_domain(root: &Path, domain: u32, fields: &[(&str, &str)]) -> PathBuf {
+    let dir = root
+        .join("bus/thunderbolt/devices")
+        .join(format!("domain{domain}"));
+    fs::create_dir_all(&dir).unwrap();
+    for (key, value) in fields {
+        write_attr(&dir, key, value);
+    }
+    dir
+}
+
 /// Helper: write a Type-C cable directory `<port>-cable` with VDOs.
 pub fn write_typec_cable(
     root: &Path,

@@ -7,6 +7,55 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- First-class `Snapshot` capture and comparison: `--save-snapshot PATH` writes a
+  serde snapshot envelope, and `usbeehive diff A [B|live]` reports changes in
+  text or JSON. Comparison and history are summary-driven; raw-only snapshots
+  are rejected by the CLI rather than reported as unchanged.
+- Opt-in CLI filters (`--class`, vendor/product IDs, speed, charging state,
+  Type-C port and severity), summary rollups, and CSV/JSON/report exports.
+  Different filters combine with AND; repeated values for a filter combine
+  with OR. The default tree and existing `--json` array shape are preserved.
+- Bounded or continuous transition output using `--watch --history`, with
+  timestamped NDJSON available through `--json`.
+- Best-effort USB4/Thunderbolt domains, router links, DisplayPort capabilities,
+  partner alternate modes and Billboard failure reports, with explicit source
+  availability and unknown-value semantics. Use `--altmodes` for the opt-in
+  human-readable or JSON system report.
+- Formal serializer and D-Bus contracts in [`docs/SCHEMA.md`](docs/SCHEMA.md),
+  a source-derived type inventory, and regression pins for the unchanged
+  `org.usbeehive.Devices5` tuple/introspection surface.
+- Additive `diagnostic.*` and `cable.trust.level` properties project structured
+  assessment details through the existing Devices5 `a(ss)` property bag.
+- Standalone React/TypeScript `DeviceCard` rendering the serde `headline`,
+  `subtitle`, and nullable `charging_diag` fields without live integrations.
+  Real CLI and D-Bus JSON fixtures are privacy-sanitized before publication.
+- CI covers the five Rust feature combinations, all-feature clippy/rustdoc,
+  and the DeviceCard tests and TypeScript check.
+
+### Changed
+
+- Cable trust and high-current diagnostics now require positive telemetry:
+  missing cable identity is inconclusive, not proof of an unmarked or unsafe
+  cable, and an advertised/selected PDO current ceiling is not operating-current
+  evidence. Legacy cable/diagnostic JSON gains coherent conservative defaults;
+  unknown diagnostic rule IDs map to `UNKNOWN` without leaking memory.
+- Comparison/history retain contract appearance and disappearance, render the
+  changed diagnostic/cable/data-rate details, and normalize imported history
+  bounds. USB4 remains system-wide unless the kernel provides a port mapping;
+  it is no longer guessed onto an unrelated Type-C partner.
+- The libudev watcher also subscribes to power-supply, USB-PD and Thunderbolt
+  events so contract and router changes can refresh tracked history.
+
+### Fixed
+
+- A cable exactly meeting the reported operating-power request is no longer
+  classified as a cable bottleneck. The boundary comparison uses precise
+  milliwatts, not whole-watt truncation.
+- CLI history/snapshot-save and diff/history/alternate-mode combinations now
+  fail explicitly instead of silently ignoring requested output modes.
+
 ## [0.12.1] - 2026-09-17
 
 ### Fixed

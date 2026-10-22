@@ -6,10 +6,10 @@
 use std::collections::BTreeMap;
 use std::path::PathBuf;
 
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 /// Discriminator for [`PowerDataObject`] entries.
-#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Serialize)]
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum PdoType {
     /// Fixed-voltage source (the standard 5V / 9V / 15V / 20V profiles).
     FixedSupply,
@@ -38,7 +38,7 @@ impl PdoType {
 }
 
 /// One PDO published by a USB-PD source or sink.
-#[derive(Debug, Clone, Default, Serialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, Eq)]
 pub struct PowerDataObject {
     /// Type discriminator parsed from the `type` sysfs file.
     pub r#type: PdoType,
@@ -82,7 +82,7 @@ impl PowerDataObject {
 }
 
 /// All PDOs published by one USB Power Delivery port.
-#[derive(Debug, Clone, Serialize, PartialEq, Eq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct PowerDeliveryPort {
     /// Absolute sysfs path of the port directory.
     pub sysfs_path: PathBuf,

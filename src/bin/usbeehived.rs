@@ -125,7 +125,10 @@ fn run_daemon() -> Result<(), Box<dyn std::error::Error>> {
         let result = run_loop(Duration::from_millis(500), |reason| {
             // Snapshot diff under the lock, but don't hold it while we hop
             // into D-Bus signal emission.
-            let (diff, headline_lookup): (usbeehive::SnapshotDiff, Vec<(String, String)>) = {
+            let (diff, headline_lookup): (
+                usbeehive::sysfs::manager::SnapshotDiff,
+                Vec<(String, String)>,
+            ) = {
                 let mut guard = watcher_state.lock().expect("state mutex poisoned");
                 let diff = guard.refresh();
                 let headlines: Vec<(String, String)> = diff
@@ -162,7 +165,7 @@ fn run_daemon() -> Result<(), Box<dyn std::error::Error>> {
 
 fn emit_signals(
     connection: &zbus::blocking::Connection,
-    diff: &usbeehive::SnapshotDiff,
+    diff: &usbeehive::sysfs::manager::SnapshotDiff,
     added_headlines: &[(String, String)],
     state: &Arc<Mutex<State>>,
 ) {

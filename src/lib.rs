@@ -48,13 +48,18 @@
 #![warn(missing_docs)]
 #![deny(unsafe_code)]
 
+pub mod altmode;
 pub mod bos;
 pub mod cable;
+pub mod compare;
 pub mod diagnostic;
+pub mod history;
 pub mod pd;
 pub mod power;
+pub mod snapshot;
 pub mod summary;
 pub mod thunderbolt;
+pub mod trust;
 pub mod typec;
 pub mod usb;
 pub mod usbclass;
@@ -66,19 +71,33 @@ pub mod sysfs;
 #[cfg(feature = "watch")]
 pub mod watch;
 
+pub use altmode::{AltModeReport, PortAltModes, Reported, Usb4Overview};
 pub use bos::{BosCapability, BosDescriptors, DataRateAssessment, DataRateVerdict};
-pub use cable::CableInfo;
-pub use diagnostic::{Bottleneck, ChargingDiagnostic};
+pub use cable::{CableInfo, CableTrust};
+pub use compare::{compare, DeviceDifference, SnapshotDiff, ValueChange};
+pub use diagnostic::{
+    Bottleneck, ChargingDiagnostic, DiagnosticConfidence, DiagnosticStatus, RootCauseCategory,
+};
+pub use history::{
+    BottleneckChangedEvent, CableWarningChangedEvent, ContractRenegotiatedEvent,
+    DataRateChangedEvent, DeviceConnectedEvent, DeviceDisconnectedEvent, HistoryEntry,
+    LinkSpeedChangedEvent, PortRoleChangedEvent, PowerChangedEvent, SnapshotHistory,
+    StateTransition, TimelineEntry,
+};
 pub use power::{PdoType, PowerDataObject, PowerDeliveryPort};
+pub use snapshot::{Snapshot, SnapshotMetadata, SourceAvailability};
 pub use summary::{Category, DeviceSummary, Status};
-pub use thunderbolt::ThunderboltRouter;
-pub use typec::{TypeCCable, TypeCIdentity, TypeCPartner, TypeCPort, TypeCPowerSupply};
+pub use thunderbolt::{ThunderboltDomain, ThunderboltRouter};
+pub use trust::{CableTrustLevel, TrustAssessment, TrustFlag, TrustSignal};
+pub use typec::{
+    TypeCAltMode, TypeCCable, TypeCIdentity, TypeCPartner, TypeCPort, TypeCPowerSupply,
+};
 pub use usb::{LinkSpeed, UsbDevice, UsbInterface};
 
 #[cfg(feature = "sysfs")]
 pub use sysfs::{
     error::{Error, Result},
-    manager::{build_summaries, DeviceManager, Snapshot, SnapshotDiff},
+    manager::{build_summaries, DeviceManager},
     reader::Sysfs,
     typec::ucsi_controller,
 };

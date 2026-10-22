@@ -4,26 +4,14 @@
 use crate::cable::CableInfo;
 use crate::power::PowerDeliveryPort;
 use crate::summary::DeviceSummary;
-use crate::thunderbolt::{self, ThunderboltRouter};
+use crate::thunderbolt::ThunderboltRouter;
 use crate::typec::TypeCPort;
 use crate::usb::UsbDevice;
 
 use super::reader::Sysfs;
 
-/// Bundle of structured data captured by one [`DeviceManager::refresh`].
-#[derive(Debug, Clone, Default)]
-pub struct Snapshot {
-    /// USB devices observed in `/sys/bus/usb/devices/`.
-    pub usb_devices: Vec<UsbDevice>,
-    /// Type-C ports observed in `/sys/class/typec/`.
-    pub typec_ports: Vec<TypeCPort>,
-    /// USB-PD ports observed in `/sys/class/usb_power_delivery/`.
-    pub pd_ports: Vec<PowerDeliveryPort>,
-    /// Thunderbolt / USB4 routers observed in `/sys/bus/thunderbolt/devices/`.
-    pub thunderbolt_routers: Vec<ThunderboltRouter>,
-    /// Plain-English summaries (one per non-root-hub device + one per Type-C port).
-    pub summaries: Vec<DeviceSummary>,
-}
+// Re-export canonical Snapshot from crate::snapshot
+pub use crate::snapshot::Snapshot;
 
 /// What changed between two [`Snapshot`]s.
 ///
@@ -304,14 +292,33 @@ impl DeviceManager {
         let typec_ports = self.sysfs.typec_ports();
         let pd_ports = self.sysfs.pd_ports();
         let thunderbolt_routers = self.sysfs.thunderbolt_routers();
+        let thunderbolt_domains = self.sysfs.thunderbolt_domains();
+        let availability = Some(crate::snapshot::SourceAvailability {
+            usb_bus: super::reader::path_exists(self.sysfs.usb_devices_dir()),
+            typec_class: super::reader::path_exists(self.sysfs.typec_dir()),
+            pd_class: super::reader::path_exists(self.sysfs.pd_dir()),
+            thunderbolt_bus: self.sysfs.has_thunderbolt_bus(),
+        });
         let summaries =
             build_summaries(&usb_devices, &typec_ports, &pd_ports, &thunderbolt_routers);
+        let now_ms = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map(|d| d.as_millis() as u64)
+            .unwrap_or(0);
+        let metadata = Some(crate::snapshot::SnapshotMetadata {
+            captured_at_ms: now_ms,
+            sequence: 0,
+            source: "sysfs".to_string(),
+        });
         self.snapshot = Snapshot {
             usb_devices,
             typec_ports,
             pd_ports,
             thunderbolt_routers,
+            thunderbolt_domains,
+            availability,
             summaries,
+            metadata,
         };
     }
 
@@ -354,17 +361,15 @@ impl DeviceManager {
 /// Build per-device summaries from the structured snapshot inputs. Public so
 /// callers using a non-sysfs backend can still get the aggregate view.
 ///
-/// `tb` carries the Thunderbolt / USB4 router list — used to derive the
-/// `transport.usb4` property on Type-C ports when both ends of the link
-/// negotiated USB4. Pass `&[]` if you don't have the data.
+/// `tb` is retained for API compatibility. USB4 is reported system-wide by
+/// [`crate::altmode::analyze`], never attributed to an uncorrelated Type-C port.
 pub fn build_summaries(
     usb: &[UsbDevice],
     ports: &[TypeCPort],
     pd: &[PowerDeliveryPort],
-    tb: &[ThunderboltRouter],
+    _tb: &[ThunderboltRouter],
 ) -> Vec<DeviceSummary> {
     let mut out = Vec::with_capacity(usb.len() + ports.len());
-    let usb4_link = thunderbolt::system_has_usb4_link(tb);
 
     for tc in ports {
         // Pairing precedence:
@@ -404,16 +409,7 @@ pub fn build_summaries(
             .filter(|pa| !pa.usb_name.is_empty())
             .and_then(|pa| usb.iter().find(|d| d.bus_port == pa.usb_name));
         let cable = tc.cable.as_ref().map(CableInfo::from_typec_cable);
-        let mut summary = DeviceSummary::from_typec_port(tc, pd_match, cable, usb_match);
-        // USB4 isn't an altmode — it's negotiated in PD enter-mode and only
-        // surfaces through the `thunderbolt` subsystem. Fire `transport.usb4`
-        // when the system has an active USB4 link AND this port has a
-        // partner that could plausibly be carrying it.
-        if usb4_link && tc.partner.is_some() {
-            summary
-                .properties
-                .push(("transport.usb4".into(), "true".into()));
-        }
+        let summary = DeviceSummary::from_typec_port(tc, pd_match, cable, usb_match);
         out.push(summary);
     }
 
@@ -651,6 +647,7 @@ mod tests {
             summary: "Cable is limiting charging speed".into(),
             detail: "Cable rated for 60W, but charger can deliver 100W".into(),
             is_warning: true,
+            ..Default::default()
         });
         let cur = Snapshot {
             summaries,
@@ -674,6 +671,7 @@ mod tests {
             summary: "Cable is limiting charging speed".into(),
             detail: "".into(),
             is_warning: true,
+            ..Default::default()
         });
         let prev = Snapshot {
             summaries: prev_summaries,
@@ -717,7 +715,7 @@ mod tests {
     }
 
     #[test]
-    fn transport_usb4_fires_for_port_with_partner_when_usb4_link_present() {
+    fn transport_usb4_is_not_attributed_to_uncorrelated_port() {
         let port = TypeCPort {
             port_number: 0,
             partner: Some(TypeCPartner::default()),
@@ -739,7 +737,7 @@ mod tests {
         ];
         let summaries = build_summaries(&[], std::slice::from_ref(&port), &[], &routers);
         let s = &summaries[0];
-        assert!(s
+        assert!(!s
             .properties
             .iter()
             .any(|(k, v)| k == "transport.usb4" && v == "true"));

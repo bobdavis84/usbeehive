@@ -2,8 +2,8 @@
 //! [Zetaphor/whatcable-linux](https://github.com/Zetaphor/whatcable-linux)).
 //!
 //! This crate is a thin wrapper around the [`udev`] crate that watches the
-//! `usb` and `typec` subsystems and notifies the caller when devices come
-//! and go. The intended usage is:
+//! USB, Type-C, power-supply/PD, and Thunderbolt subsystems and notifies the
+//! caller when devices or their contracts change. The intended usage is:
 //!
 //! 1. Take an initial snapshot (e.g. via `usbeehive::DeviceManager::refresh`).
 //! 2. Open a [`Watcher`] and treat it as a "did anything change?" signal.
@@ -53,8 +53,8 @@ pub enum WaitResult {
     Interrupted,
 }
 
-/// Subscriptions for [`Watcher`]. Defaults to `usb` + `typec`, which is the
-/// pair usbeehive cares about.
+/// Subscriptions for [`Watcher`]. Defaults to USB, Type-C, power-supply/PD,
+/// and Thunderbolt events so contract changes also refresh snapshot history.
 #[derive(Debug, Clone)]
 pub struct WatcherConfig {
     /// Subsystems to subscribe to (passed to `udev_monitor_filter_add_match_subsystem_devtype`).
@@ -64,7 +64,16 @@ pub struct WatcherConfig {
 impl Default for WatcherConfig {
     fn default() -> Self {
         WatcherConfig {
-            subsystems: vec!["usb".into(), "typec".into()],
+            subsystems: [
+                "usb",
+                "typec",
+                "power_supply",
+                "usb_power_delivery",
+                "thunderbolt",
+            ]
+            .into_iter()
+            .map(String::from)
+            .collect(),
         }
     }
 }
@@ -77,7 +86,7 @@ pub struct Watcher {
 }
 
 impl Watcher {
-    /// Open a watcher with the default subsystem set (`usb` + `typec`).
+    /// Open a watcher with the default USB, Type-C, power, and router subscriptions.
     pub fn new() -> io::Result<Self> {
         Self::with_config(&WatcherConfig::default())
     }
@@ -273,6 +282,17 @@ mod tests {
         let cfg = WatcherConfig::default();
         assert!(cfg.subsystems.iter().any(|s| s == "usb"));
         assert!(cfg.subsystems.iter().any(|s| s == "typec"));
+    }
+
+    #[test]
+    fn watcher_subscribes_to_contract_and_router_changes() {
+        let cfg = WatcherConfig::default();
+        for subsystem in ["power_supply", "usb_power_delivery", "thunderbolt"] {
+            assert!(
+                cfg.subsystems.iter().any(|s| s == subsystem),
+                "missing {subsystem} events would leave history stale"
+            );
+        }
     }
 
     // Real watcher construction needs libudev. Inside this repo's CI we have

@@ -1,0 +1,1091 @@
+[
+  {
+    "category": "typec",
+    "deviceClass": "Unknown",
+    "deviceSubclass": "",
+    "headline": "USB-C Port 0",
+    "icon": "plug",
+    "linkSpeedMbps": 0,
+    "power": {
+      "contractMW": 0,
+      "powerInMW": 0,
+      "powerOutMW": 0,
+      "powerRole": "Unknown"
+    },
+    "primaryDriver": "",
+    "product": "",
+    "productId": "0x0000",
+    "properties": [],
+    "status": "Empty",
+    "subtitle": "Nothing connected",
+    "typec": {
+      "connected": false,
+      "dataRole": "host",
+      "port": 0,
+      "portType": "",
+      "powerOpMode": "default",
+      "powerRole": "source",
+      "powerSupply": {
+        "chargeType": "N/A",
+        "currentMaxUA": 0,
+        "currentNowUA": 0,
+        "name": "ucsi-source-psy-USBC000:001",
+        "online": false,
+        "usbType": "[C] PD PD_PPS",
+        "voltageMaxUV": 0,
+        "voltageMinUV": 0,
+        "voltageNowUV": 0
+      }
+    },
+    "usbVersion": "",
+    "vendor": "",
+    "vendorId": "0x0000"
+  },
+  {
+    "category": "typec",
+    "deviceClass": "Unknown",
+    "deviceSubclass": "",
+    "headline": "USB-C Port 1",
+    "icon": "plug",
+    "linkSpeedMbps": 0,
+    "power": {
+      "contractMW": 0,
+      "powerInMW": 0,
+      "powerOutMW": 0,
+      "powerRole": "Source"
+    },
+    "primaryDriver": "",
+    "product": "",
+    "productId": "0x0000",
+    "properties": [
+      [
+        "data_role",
+        "host"
+      ],
+      [
+        "power_mode",
+        "default"
+      ],
+      [
+        "pd_revision",
+        "2.0"
+      ],
+      [
+        "altmode.reported",
+        "none"
+      ]
+    ],
+    "status": "Sourcing",
+    "subtitle": "Device connected",
+    "typec": {
+      "connected": true,
+      "dataRole": "host",
+      "port": 1,
+      "portType": "",
+      "powerOpMode": "default",
+      "powerRole": "source",
+      "powerSupply": {
+        "chargeType": "Unknown",
+        "currentMaxUA": 0,
+        "currentNowUA": 0,
+        "name": "ucsi-source-psy-USBC000:002",
+        "online": false,
+        "usbType": "C [PD] PD_PPS",
+        "voltageMaxUV": 0,
+        "voltageMinUV": 0,
+        "voltageNowUV": 0
+      }
+    },
+    "usbVersion": "",
+    "vendor": "",
+    "vendorId": "0x0000"
+  },
+  {
+    "category": "hub",
+    "dataRate": {
+      "capable_gen": "",
+      "capable_mbps": 5000,
+      "detail": "Vendor declares full functionality from 12 Mbps — not a fault",
+      "functional_floor_mbps": 12,
+      "is_warning": false,
+      "negotiated_mbps": 480,
+      "summary": "Linked at 480 Mbps of an advertised 5 Gbps",
+      "verdict": "BelowCapability"
+    },
+    "deviceClass": "Hub",
+    "deviceSubclass": "",
+    "headline": "USB2.0 Hub",
+    "icon": "network-wired",
+    "linkSpeedMbps": 480,
+    "power": {
+      "contractMW": 0,
+      "powerInMW": 0,
+      "powerOutMW": 0,
+      "powerRole": "Unknown"
+    },
+    "primaryDriver": "hub",
+    "product": "USB2.0 Hub",
+    "productId": "0x2817",
+    "properties": [
+      [
+        "mount",
+        "removable"
+      ],
+      [
+        "transport.usb2",
+        "true"
+      ],
+      [
+        "usb_bos_container_id",
+        "00000000-0000-0000-0000-000000000000"
+      ],
+      [
+        "usb_capable_speed_mbps",
+        "5000"
+      ],
+      [
+        "usb_capable_speed",
+        "SuperSpeed 5 Gbps"
+      ],
+      [
+        "usb_functional_floor_mbps",
+        "12"
+      ],
+      [
+        "usb_link_verdict",
+        "BelowCapability"
+      ],
+      [
+        "port.id",
+        "usb3-port1"
+      ],
+      [
+        "port.connect_type",
+        "hotplug"
+      ],
+      [
+        "hub.ports_total",
+        "4"
+      ],
+      [
+        "hub.ports_used",
+        "4"
+      ],
+      [
+        "power.source",
+        "self"
+      ],
+      [
+        "hub.power_committed_ma",
+        "950"
+      ],
+      [
+        "kernel.quirks",
+        "NO_LPM"
+      ]
+    ],
+    "status": "Connected",
+    "subtitle": "VIA Labs · Hub",
+    "usb": {
+      "bos": {
+        "capabilities": [
+          {
+            "baseline_besl": 0,
+            "baseline_besl_valid": false,
+            "besl": true,
+            "bm_attributes": 6,
+            "deep_besl": 0,
+            "deep_besl_valid": false,
+            "kind": "Usb2Extension",
+            "lpm": true
+          },
+          {
+            "functionality_support": 1,
+            "kind": "SuperSpeed",
+            "ltm_capable": false,
+            "speeds_supported": 14,
+            "u1_dev_exit_lat_us": 4,
+            "u2_dev_exit_lat_us": 231
+          },
+          {
+            "kind": "ContainerId",
+            "uuid": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          }
+        ],
+        "num_device_caps": 3,
+        "total_length": 42,
+        "truncated": false
+      },
+      "bosSuppressedByQuirk": false,
+      "bus": 3,
+      "device": 10,
+      "interfaces": [
+        {
+          "class": "Hub",
+          "driver": "hub"
+        }
+      ],
+      "isHub": true,
+      "manufacturer": "VIA Labs, Inc.",
+      "maxPowerMA": 0,
+      "product": "USB2.0 Hub",
+      "productId": "0x2817",
+      "quirks": 1024,
+      "removable": "removable",
+      "serial": "",
+      "speed": 480,
+      "speedLabel": "High Speed 480 Mbps",
+      "vendorId": "0x2109",
+      "version": "2.10"
+    },
+    "usbVersion": "2.1",
+    "vendor": "VIA Labs, Inc.",
+    "vendorId": "0x2109"
+  },
+  {
+    "category": "usb",
+    "dataRate": {
+      "capable_gen": "",
+      "capable_mbps": 5000,
+      "detail": "Vendor declares full functionality from 12 Mbps — not a fault",
+      "functional_floor_mbps": 12,
+      "is_warning": false,
+      "negotiated_mbps": 480,
+      "summary": "Linked at 480 Mbps of an advertised 5 Gbps",
+      "verdict": "BelowCapability"
+    },
+    "deviceClass": "Storage",
+    "deviceSubclass": "scsi",
+    "headline": "Mass Storage Device",
+    "icon": "drive-removable-media",
+    "linkSpeedMbps": 480,
+    "power": {
+      "contractMW": 0,
+      "powerInMW": 0,
+      "powerOutMW": 0,
+      "powerRole": "Unknown"
+    },
+    "primaryDriver": "usb-storage",
+    "product": "Mass Storage Device",
+    "productId": "0x8468",
+    "properties": [
+      [
+        "serial",
+        "REDACTED"
+      ],
+      [
+        "usb_max_power_ma",
+        "100"
+      ],
+      [
+        "transport.usb2",
+        "true"
+      ],
+      [
+        "usb_capable_speed_mbps",
+        "5000"
+      ],
+      [
+        "usb_capable_speed",
+        "SuperSpeed 5 Gbps"
+      ],
+      [
+        "usb_functional_floor_mbps",
+        "12"
+      ],
+      [
+        "usb_link_verdict",
+        "BelowCapability"
+      ],
+      [
+        "port.id",
+        "3-1-port1"
+      ],
+      [
+        "power.source",
+        "bus"
+      ]
+    ],
+    "status": "Connected",
+    "subtitle": "Alcor Micro · Mass Storage",
+    "usb": {
+      "bos": {
+        "capabilities": [
+          {
+            "baseline_besl": 0,
+            "baseline_besl_valid": false,
+            "besl": true,
+            "bm_attributes": 6,
+            "deep_besl": 0,
+            "deep_besl_valid": false,
+            "kind": "Usb2Extension",
+            "lpm": true
+          },
+          {
+            "functionality_support": 1,
+            "kind": "SuperSpeed",
+            "ltm_capable": false,
+            "speeds_supported": 14,
+            "u1_dev_exit_lat_us": 10,
+            "u2_dev_exit_lat_us": 2047
+          }
+        ],
+        "num_device_caps": 2,
+        "total_length": 22,
+        "truncated": false
+      },
+      "bus": 3,
+      "device": 11,
+      "interfaces": [
+        {
+          "class": "Mass Storage",
+          "driver": "usb-storage"
+        }
+      ],
+      "isHub": false,
+      "manufacturer": "Generic",
+      "maxPowerMA": 100,
+      "product": "Mass Storage Device",
+      "productId": "0x8468",
+      "removable": "unknown",
+      "serial": "REDACTED",
+      "speed": 480,
+      "speedLabel": "High Speed 480 Mbps",
+      "vendorId": "0x058f",
+      "version": "2.10"
+    },
+    "usbVersion": "2.1",
+    "vendor": "Generic",
+    "vendorId": "0x058f"
+  },
+  {
+    "category": "usb",
+    "dataRate": {
+      "capable_gen": "",
+      "capable_mbps": 5000,
+      "detail": "Vendor declares full functionality from 12 Mbps — not a fault",
+      "functional_floor_mbps": 12,
+      "is_warning": false,
+      "negotiated_mbps": 480,
+      "summary": "Linked at 480 Mbps of an advertised 5 Gbps",
+      "verdict": "BelowCapability"
+    },
+    "deviceClass": "Storage",
+    "deviceSubclass": "scsi",
+    "headline": "BUP Portable",
+    "icon": "drive-removable-media",
+    "linkSpeedMbps": 480,
+    "power": {
+      "contractMW": 0,
+      "powerInMW": 0,
+      "powerOutMW": 0,
+      "powerRole": "Unknown"
+    },
+    "primaryDriver": "uas",
+    "product": "BUP Portable",
+    "productId": "0xac41",
+    "properties": [
+      [
+        "serial",
+        "REDACTED"
+      ],
+      [
+        "usb_max_power_ma",
+        "500"
+      ],
+      [
+        "transport.usb2",
+        "true"
+      ],
+      [
+        "usb_capable_speed_mbps",
+        "5000"
+      ],
+      [
+        "usb_capable_speed",
+        "SuperSpeed 5 Gbps"
+      ],
+      [
+        "usb_functional_floor_mbps",
+        "12"
+      ],
+      [
+        "usb_link_verdict",
+        "BelowCapability"
+      ],
+      [
+        "port.id",
+        "3-1-port2"
+      ],
+      [
+        "power.source",
+        "bus"
+      ]
+    ],
+    "status": "Connected",
+    "subtitle": "Seagate · Mass Storage",
+    "usb": {
+      "bos": {
+        "capabilities": [
+          {
+            "baseline_besl": 15,
+            "baseline_besl_valid": true,
+            "besl": true,
+            "bm_attributes": 3854,
+            "deep_besl": 0,
+            "deep_besl_valid": false,
+            "kind": "Usb2Extension",
+            "lpm": true
+          },
+          {
+            "functionality_support": 1,
+            "kind": "SuperSpeed",
+            "ltm_capable": false,
+            "speeds_supported": 14,
+            "u1_dev_exit_lat_us": 10,
+            "u2_dev_exit_lat_us": 32
+          }
+        ],
+        "num_device_caps": 2,
+        "total_length": 22,
+        "truncated": false
+      },
+      "bus": 3,
+      "device": 12,
+      "interfaces": [
+        {
+          "class": "Mass Storage",
+          "driver": "uas"
+        }
+      ],
+      "isHub": false,
+      "manufacturer": "Seagate",
+      "maxPowerMA": 500,
+      "product": "BUP Portable",
+      "productId": "0xac41",
+      "removable": "unknown",
+      "serial": "REDACTED",
+      "speed": 480,
+      "speedLabel": "High Speed 480 Mbps",
+      "vendorId": "0x0bc2",
+      "version": "2.10"
+    },
+    "usbVersion": "2.1",
+    "vendor": "Seagate",
+    "vendorId": "0x0bc2"
+  },
+  {
+    "category": "hub",
+    "deviceClass": "Hub",
+    "deviceSubclass": "",
+    "headline": "USB 2.0 Hub",
+    "icon": "network-wired",
+    "linkSpeedMbps": 480,
+    "power": {
+      "contractMW": 0,
+      "powerInMW": 0,
+      "powerOutMW": 0,
+      "powerRole": "Unknown"
+    },
+    "primaryDriver": "hub",
+    "product": "USB 2.0 Hub",
+    "productId": "0x0801",
+    "properties": [
+      [
+        "usb_max_power_ma",
+        "100"
+      ],
+      [
+        "transport.usb2",
+        "true"
+      ],
+      [
+        "port.id",
+        "3-1-port3"
+      ],
+      [
+        "hub.ports_total",
+        "4"
+      ],
+      [
+        "hub.ports_used",
+        "1"
+      ],
+      [
+        "power.source",
+        "self"
+      ],
+      [
+        "hub.power_committed_ma",
+        "0"
+      ]
+    ],
+    "status": "Connected",
+    "subtitle": "Terminus Technology · Hub",
+    "usb": {
+      "bus": 3,
+      "device": 13,
+      "interfaces": [
+        {
+          "class": "Hub",
+          "driver": "hub"
+        }
+      ],
+      "isHub": true,
+      "manufacturer": "",
+      "maxPowerMA": 100,
+      "product": "USB 2.0 Hub",
+      "productId": "0x0801",
+      "removable": "unknown",
+      "serial": "",
+      "speed": 480,
+      "speedLabel": "High Speed 480 Mbps",
+      "vendorId": "0x1a40",
+      "version": "2.00"
+    },
+    "usbVersion": "2.0",
+    "vendor": "Terminus Technology",
+    "vendorId": "0x1a40"
+  },
+  {
+    "category": "usb",
+    "dataRate": {
+      "capable_gen": "",
+      "capable_mbps": 0,
+      "detail": "",
+      "functional_floor_mbps": 0,
+      "is_warning": false,
+      "negotiated_mbps": 12,
+      "summary": "",
+      "verdict": "Unknown"
+    },
+    "deviceClass": "Unknown",
+    "deviceSubclass": "",
+    "headline": "USB 2.0 BILLBOARD",
+    "icon": "drive-removable-media-usb",
+    "linkSpeedMbps": 12,
+    "power": {
+      "contractMW": 0,
+      "powerInMW": 0,
+      "powerOutMW": 0,
+      "powerRole": "Unknown"
+    },
+    "primaryDriver": "",
+    "product": "USB 2.0 BILLBOARD",
+    "productId": "0x0103",
+    "properties": [
+      [
+        "serial",
+        "REDACTED"
+      ],
+      [
+        "transport.usb2",
+        "true"
+      ],
+      [
+        "usb_altmode_svids",
+        "ff01"
+      ],
+      [
+        "usb_altmode_state",
+        "NotAttempted"
+      ],
+      [
+        "port.id",
+        "3-1.3-port2"
+      ],
+      [
+        "power.source",
+        "self"
+      ]
+    ],
+    "status": "Connected",
+    "subtitle": "VIA Labs · Billboard",
+    "usb": {
+      "bos": {
+        "capabilities": [
+          {
+            "kind": "ContainerId",
+            "uuid": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "additional_failure_info": 0,
+            "alt_modes": [
+              {
+                "index": 0,
+                "mode": 0,
+                "state": "NotAttempted",
+                "svid": 65281
+              }
+            ],
+            "bcd_version": 289,
+            "kind": "Billboard",
+            "no_battery_power": false,
+            "no_usb_pd_communication": false,
+            "num_alternate_modes": 1,
+            "preferred_alternate_mode": 0,
+            "vconn_power": 1
+          },
+          {
+            "cap_type": 15,
+            "data": [
+              0,
+              0,
+              0,
+              0,
+              0
+            ],
+            "kind": "Other"
+          },
+          {
+            "baseline_besl": 0,
+            "baseline_besl_valid": false,
+            "besl": false,
+            "bm_attributes": 0,
+            "deep_besl": 0,
+            "deep_besl_valid": false,
+            "kind": "Usb2Extension",
+            "lpm": false
+          }
+        ],
+        "num_device_caps": 4,
+        "total_length": 88,
+        "truncated": false
+      },
+      "bus": 3,
+      "device": 15,
+      "interfaces": [
+        {
+          "class": "Billboard",
+          "driver": ""
+        }
+      ],
+      "isHub": false,
+      "manufacturer": "VLI Inc.",
+      "maxPowerMA": 0,
+      "product": "USB 2.0 BILLBOARD",
+      "productId": "0x0103",
+      "removable": "unknown",
+      "serial": "REDACTED",
+      "speed": 12,
+      "speedLabel": "Full Speed 12 Mbps",
+      "vendorId": "0x2109",
+      "version": "2.01"
+    },
+    "usbVersion": "2.0",
+    "vendor": "VLI Inc.",
+    "vendorId": "0x2109"
+  },
+  {
+    "category": "usb",
+    "dataRate": {
+      "capable_gen": "",
+      "capable_mbps": 5000,
+      "detail": "Vendor declares full functionality from 480 Mbps — not a fault",
+      "functional_floor_mbps": 480,
+      "is_warning": false,
+      "negotiated_mbps": 480,
+      "summary": "Linked at 480 Mbps of an advertised 5 Gbps",
+      "verdict": "BelowCapability"
+    },
+    "deviceClass": "NetworkWired",
+    "deviceSubclass": "",
+    "headline": "USB 10/100/1000 LAN",
+    "icon": "network-wired",
+    "linkSpeedMbps": 480,
+    "power": {
+      "contractMW": 0,
+      "powerInMW": 0,
+      "powerOutMW": 0,
+      "powerRole": "Unknown"
+    },
+    "primaryDriver": "r8152",
+    "product": "USB 10/100/1000 LAN",
+    "productId": "0x8153",
+    "properties": [
+      [
+        "serial",
+        "REDACTED"
+      ],
+      [
+        "usb_max_power_ma",
+        "350"
+      ],
+      [
+        "transport.usb2",
+        "true"
+      ],
+      [
+        "usb_capable_speed_mbps",
+        "5000"
+      ],
+      [
+        "usb_capable_speed",
+        "SuperSpeed 5 Gbps"
+      ],
+      [
+        "usb_functional_floor_mbps",
+        "480"
+      ],
+      [
+        "usb_link_verdict",
+        "BelowCapability"
+      ],
+      [
+        "port.id",
+        "3-1-port4"
+      ],
+      [
+        "power.source",
+        "bus"
+      ],
+      [
+        "kernel.quirks",
+        "NO_LPM"
+      ],
+      [
+        "product_db",
+        "RTL8153 Gigabit Ethernet Adapter"
+      ]
+    ],
+    "status": "Connected",
+    "subtitle": "Realtek · Vendor Specific",
+    "usb": {
+      "bos": {
+        "capabilities": [
+          {
+            "baseline_besl": 0,
+            "baseline_besl_valid": false,
+            "besl": true,
+            "bm_attributes": 6,
+            "deep_besl": 0,
+            "deep_besl_valid": false,
+            "kind": "Usb2Extension",
+            "lpm": true
+          },
+          {
+            "functionality_support": 2,
+            "kind": "SuperSpeed",
+            "ltm_capable": true,
+            "speeds_supported": 14,
+            "u1_dev_exit_lat_us": 10,
+            "u2_dev_exit_lat_us": 2047
+          }
+        ],
+        "num_device_caps": 2,
+        "total_length": 22,
+        "truncated": false
+      },
+      "bosSuppressedByQuirk": false,
+      "bus": 3,
+      "device": 14,
+      "interfaces": [
+        {
+          "class": "Vendor Specific",
+          "driver": "r8152"
+        }
+      ],
+      "isHub": false,
+      "manufacturer": "Realtek",
+      "maxPowerMA": 350,
+      "product": "USB 10/100/1000 LAN",
+      "productId": "0x8153",
+      "quirks": 1024,
+      "removable": "unknown",
+      "serial": "REDACTED",
+      "speed": 480,
+      "speedLabel": "High Speed 480 Mbps",
+      "vendorId": "0x0bda",
+      "version": "2.10"
+    },
+    "usbVersion": "2.1",
+    "vendor": "Realtek",
+    "vendorId": "0x0bda"
+  },
+  {
+    "category": "usb",
+    "dataRate": {
+      "capable_gen": "",
+      "capable_mbps": 0,
+      "detail": "",
+      "functional_floor_mbps": 0,
+      "is_warning": false,
+      "negotiated_mbps": 12,
+      "summary": "",
+      "verdict": "Unknown"
+    },
+    "deviceClass": "Bluetooth",
+    "deviceSubclass": "",
+    "headline": "Intel Wireless",
+    "icon": "bluetooth",
+    "linkSpeedMbps": 12,
+    "power": {
+      "contractMW": 0,
+      "powerInMW": 0,
+      "powerOutMW": 0,
+      "powerRole": "Unknown"
+    },
+    "primaryDriver": "btusb",
+    "product": "",
+    "productId": "0x0033",
+    "properties": [
+      [
+        "mount",
+        "fixed"
+      ],
+      [
+        "usb_max_power_ma",
+        "100"
+      ],
+      [
+        "transport.usb2",
+        "true"
+      ],
+      [
+        "port.id",
+        "usb3-port10"
+      ],
+      [
+        "port.connect_type",
+        "hardwired"
+      ],
+      [
+        "power.source",
+        "self"
+      ],
+      [
+        "product_db",
+        "AX211 Bluetooth"
+      ]
+    ],
+    "status": "Connected",
+    "subtitle": "Intel · Wireless",
+    "usb": {
+      "bos": {
+        "capabilities": [
+          {
+            "baseline_besl": 4,
+            "baseline_besl_valid": true,
+            "besl": true,
+            "bm_attributes": 1038,
+            "deep_besl": 0,
+            "deep_besl_valid": false,
+            "kind": "Usb2Extension",
+            "lpm": true
+          }
+        ],
+        "num_device_caps": 1,
+        "total_length": 12,
+        "truncated": false
+      },
+      "bus": 3,
+      "device": 4,
+      "interfaces": [
+        {
+          "class": "Wireless",
+          "driver": "btusb"
+        },
+        {
+          "class": "Wireless",
+          "driver": "btusb"
+        }
+      ],
+      "isHub": false,
+      "manufacturer": "",
+      "maxPowerMA": 100,
+      "product": "",
+      "productId": "0x0033",
+      "removable": "fixed",
+      "serial": "",
+      "speed": 12,
+      "speedLabel": "Full Speed 12 Mbps",
+      "vendorId": "0x8087",
+      "version": "2.01"
+    },
+    "usbVersion": "2.0",
+    "vendor": "Intel",
+    "vendorId": "0x8087"
+  },
+  {
+    "category": "usb",
+    "dataRate": {
+      "capable_gen": "",
+      "capable_mbps": 0,
+      "detail": "",
+      "functional_floor_mbps": 0,
+      "is_warning": false,
+      "negotiated_mbps": 480,
+      "summary": "",
+      "verdict": "Unknown"
+    },
+    "deviceClass": "Camera",
+    "deviceSubclass": "webcam",
+    "headline": "USB2.0 FHD UVC WebCam",
+    "icon": "camera-web",
+    "linkSpeedMbps": 480,
+    "power": {
+      "contractMW": 0,
+      "powerInMW": 0,
+      "powerOutMW": 0,
+      "powerRole": "Unknown"
+    },
+    "primaryDriver": "uvcvideo",
+    "product": "USB2.0 FHD UVC WebCam",
+    "productId": "0x0033",
+    "properties": [
+      [
+        "serial",
+        "REDACTED"
+      ],
+      [
+        "mount",
+        "fixed"
+      ],
+      [
+        "usb_max_power_ma",
+        "500"
+      ],
+      [
+        "transport.usb2",
+        "true"
+      ],
+      [
+        "port.id",
+        "usb3-port8"
+      ],
+      [
+        "port.connect_type",
+        "hardwired"
+      ],
+      [
+        "power.source",
+        "bus"
+      ]
+    ],
+    "status": "Connected",
+    "subtitle": "Miscellaneous",
+    "usb": {
+      "bos": {
+        "capabilities": [
+          {
+            "cap_type": 5,
+            "data": [
+              0,
+              223,
+              96,
+              221,
+              216,
+              137,
+              69,
+              199,
+              76,
+              156,
+              210,
+              101,
+              157,
+              158,
+              100,
+              138,
+              159,
+              0,
+              0,
+              3,
+              6,
+              200,
+              4,
+              21,
+              0
+            ],
+            "kind": "Other"
+          },
+          {
+            "cap_type": 17,
+            "data": [
+              1,
+              3,
+              0,
+              0,
+              0
+            ],
+            "kind": "Other"
+          }
+        ],
+        "num_device_caps": 2,
+        "total_length": 41,
+        "truncated": false
+      },
+      "bus": 3,
+      "device": 3,
+      "interfaces": [
+        {
+          "class": "Video",
+          "driver": "uvcvideo"
+        },
+        {
+          "class": "Video",
+          "driver": "uvcvideo"
+        },
+        {
+          "class": "Video",
+          "driver": "uvcvideo"
+        },
+        {
+          "class": "Video",
+          "driver": "uvcvideo"
+        },
+        {
+          "class": "Application Specific",
+          "driver": ""
+        }
+      ],
+      "isHub": false,
+      "manufacturer": "Shinetech",
+      "maxPowerMA": 500,
+      "product": "USB2.0 FHD UVC WebCam",
+      "productId": "0x0033",
+      "removable": "fixed",
+      "serial": "REDACTED",
+      "speed": 480,
+      "speedLabel": "High Speed 480 Mbps",
+      "vendorId": "0x3277",
+      "version": "2.01"
+    },
+    "usbVersion": "2.0",
+    "vendor": "Shinetech",
+    "vendorId": "0x3277"
+  }
+]

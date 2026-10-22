@@ -26,7 +26,7 @@ The Rust rewrite is forked from
 - **Identity**: vendor, product name, serial number
 - **Speed**: negotiated link speed (1.5 Mbps to 20 Gbps)
 - **USB version**: 1.1, 2.0, 3.0, 3.1, 3.2
-- **Power draw**: how much power the device is consuming
+- **Power allowance**: declared USB bus-power demand, not measured consumption
 - **Device type**: HID, Audio, Mass Storage, Hub, etc.
 - **Driver**: which kernel driver is handling the device
 - **Topology**: hub hierarchy showing what's plugged into what
@@ -36,8 +36,17 @@ The Rust rewrite is forked from
 - **Cable e-marker info**: cable speed capability, current rating (3A/5A), active vs passive, cable vendor
 - **Charger PDO list**: every voltage / current profile the charger advertises, with the active profile highlighted
 - **Charging diagnostics**: identifies bottlenecks — cable limiting speed, charger undersized, etc.
-- **Live wattage** (UCSI): `voltage_now × current_now`, exposed as `negotiatedPowerMW` in JSON output and via `TypeCPowerSupply::negotiated_power_mw()` in the library.
+- **Requested operating power** (UCSI): `voltage_now × current_now`, exposed as `negotiatedPowerMW` in JSON output and via `TypeCPowerSupply::negotiated_power_mw()` in the library. These kernel values describe the negotiated operating point, not a power-meter reading.
 - **Partner identity**: decoded from PD Discover Identity VDOs
+
+### Mock-data UI component
+
+[`ui/DeviceCard.tsx`](ui/DeviceCard.tsx) is a standalone React/TypeScript
+component for `headline`, `subtitle`, and nullable `charging_diag` fields from
+the D-Bus `SnapshotJson` shape. It uses caller-provided data only; no live D-Bus
+or Rust calls are wired into the component. See [`ui/README.md`](ui/README.md)
+for usage and tests, and [`docs/MOCK_DATA.md`](docs/MOCK_DATA.md) for the privacy-
+sanitized real CLI and D-Bus fixture captures.
 
 ## Install
 
@@ -61,6 +70,10 @@ needs a C compiler (`cc`) plus the `libudev` development headers:
 # Ubuntu / Debian
 sudo apt install gcc libudev-dev
 ```
+
+The core library and default CLI support Rust 1.85. The optional D-Bus build
+requires Rust 1.87 with the currently locked zbus dependency stack. Both
+configurations are checked in CI.
 
 ### Build from source
 
@@ -99,9 +112,47 @@ usbeehive --json                           # structured JSON output
 usbeehive --watch                          # stream updates as devices come and go
 usbeehive --raw                            # include raw sysfs attributes
 usbeehive --sysfs-root /tmp/fixture-root   # run against a captured tree (testing)
+usbeehive --class storage --min-speed 480  # filter by class and negotiated speed
+usbeehive --vendor 046d --severity warning # filter by VID and warning level
+usbeehive --summary --json                 # aggregate counts and per-port view
+usbeehive --format csv                     # export an inventory as CSV
+usbeehive --format report                  # human-readable report
+usbeehive --altmodes                       # Type-C modes, Billboard and USB4 caveats
+usbeehive --altmodes --json                # structured alternate-mode report
+usbeehive --save-snapshot before.json      # save full snapshot envelope
+usbeehive diff before.json after.json      # compare saved snapshots
+usbeehive --watch --history --json         # stream transition events as NDJSON
+usbeehive --history --samples 10            # bounded capture without waiting for Ctrl-C
 usbeehive --version
 usbeehive --help
 ```
+
+Filters with different names combine with AND; repeating one selector combines
+its values with OR. Unknown values do not match a filter requiring that data.
+`--min-speed` / `--max-speed` accept Mbps values (`480`, `5G`, `10Gbps`).
+`--severity` accepts `ok`, `info`, `warning`, or `critical`. Filtered text is a
+flat listing; the no-filter default tree and legacy `--json` array are preserved.
+`--summary` accepts `--json`; `--format` accepts `csv`, `json`, or `report`.
+`--save-snapshot` writes a serde `Snapshot` object, not the legacy CLI `--json`
+array. For live comparison, omit the second `diff` path or use the literal `live`.
+Place `--sysfs-root PATH` before a subcommand when testing fixture trees.
+
+`--altmodes` presents the best-effort DisplayPort, Thunderbolt 3 alt-mode,
+Billboard, and system-wide USB4/Thunderbolt view. Its report explicitly
+distinguishes absent from unrecorded subsystems and does not attribute a
+system-wide USB4 router to an individual Type-C port. Live tunnel state and the
+active DisplayPort pin assignment are not exposed by the supported sysfs API.
+
+For scripts, use the documented CLI shape directly, for example:
+
+```sh
+usbeehive --json | jq '.[] | {headline, vendorId, productId, linkSpeedMbps}'
+usbeehive --summary --json | jq '{total, countsByType, pdBottlenecks}'
+usbeehive diff before.json after.json --json | jq '.modified[] | {id, link_speed_mbps}'
+```
+
+CLI JSON and D-Bus `SnapshotJson` are distinct contracts with different field
+names and nested value types; see [`docs/SCHEMA.md`](docs/SCHEMA.md).
 
 ## Library usage
 
@@ -166,7 +217,37 @@ run_loop(Duration::from_millis(500), |_reason| {
 }).unwrap();
 ```
 
-See [`examples/`](examples) for more.
+### Compare snapshots and retain recent transitions
+
+```rust,no_run
+use usbeehive::{compare, history::SnapshotHistory, DeviceManager};
+
+let mut manager = DeviceManager::new();
+manager.refresh();
+let before = manager.snapshot().clone();
+// Plug in or change an adapter before taking the second capture.
+manager.refresh();
+let after = manager.snapshot().clone();
+let diff = compare::compare(&before, &after);
+println!("{}", diff.render_text());
+
+let mut history = SnapshotHistory::with_capacity(100);
+history.push(before, 1_000); // timestamps supplied by the caller, in milliseconds
+for transition in history.push(after, 2_000) {
+    println!("{transition}");
+}
+// history.timeline() includes the timestamp and sequence of each retained event.
+```
+
+`Snapshot`, `compare`, `history`, and the diagnostic/trust models are IO-free
+and available with `default-features = false`; callers provide snapshots and
+timestamps. `DeviceManager` above requires `sysfs`. JSON convenience methods
+require `cli` or `dbus`; pure-core consumers can use their own `serde` serializer.
+History is a bounded in-memory buffer, not a background recorder: callers push
+each capture, the first establishes a baseline, and oldest entries are evicted.
+
+See [`examples/`](examples) for more and [`docs/SCHEMA.md`](docs/SCHEMA.md) for
+field contracts, units, nullability, and compatibility rules.
 
 ## D-Bus daemon (optional)
 
@@ -195,7 +276,7 @@ Each `ListDevices` entry is a 21-field tuple:
 | `ListDevices` | method `() → a(ssssssssssqqsa(ss)ius(uuus)(bsssb)a(usuuuub)i)` | One structured entry per summary. Properties are `(machine_key, value)` pairs; `pdo_list` is the structured source-PDO advertisement. |
 | `ListPorts` | method `() → ai` | Type-C `port_number`s currently exposed. |
 | `Diagnose` | method `(i) → (bsssb)` | Charging diagnostic for a port — same shape as the per-entry `charging_diag`. `present == false` when none available. |
-| `SnapshotJson` | method `() → s` | Full structured snapshot — same shape as `usbeehive --json`. |
+| `SnapshotJson` | method `() → s` | Full serde `DeviceSummary` array (snake_case), **not** the CLI's camelCase `--json` array. See [schema contracts](docs/SCHEMA.md). |
 | `Refresh` | method `() → u` | Force a re-enumeration; returns the new device count. |
 | `Version` / `DeviceCount` | properties | Crate version + summary count. |
 | `DeviceAdded` / `DeviceRemoved` | signals | Fire when a device or port appears / disappears. |
@@ -242,7 +323,7 @@ migration table.
 
 ## How it works
 
-usbeehive reads three areas of the Linux sysfs filesystem. No root access
+usbeehive reads the following Linux sysfs interfaces. No root access
 required for basic info:
 
 | sysfs path | Provides |
@@ -250,9 +331,12 @@ required for basic info:
 | `/sys/bus/usb/devices/` | All USB devices: vendor, product, speed, power, class, interfaces, topology |
 | `/sys/class/typec/` | USB-C port state: connection, roles, cable e-marker, partner identity |
 | `/sys/class/usb_power_delivery/` | PD negotiation: PDO list from charger, active profile, PPS ranges |
-| `/sys/class/power_supply/ucsi-source-psy-*` | Live `voltage_now × current_now` charging readout |
+| `/sys/class/power_supply/ucsi-source-psy-*` | Negotiated/requested operating point from `voltage_now × current_now` |
+| `/sys/bus/thunderbolt/devices/` | Thunderbolt/USB4 routers, domain security policy, optional link information |
 
-Hotplug uses `libudev` to detect connect/disconnect events in real time.
+Hotplug uses `libudev` to detect USB, Type-C, power-supply/PD, and Thunderbolt
+events. Changes are observable only when the kernel/driver exposes the data
+and emits an event; absence of an event is not evidence that nothing changed.
 
 Cable speed and power decoding follow the USB Power Delivery 3.x spec,
 ported from the original WhatCable's Swift implementation.
@@ -265,8 +349,25 @@ ported from the original WhatCable's Swift implementation.
   data; others expose only basic port info or nothing at all.
 - **Cable e-marker info only appears for cables that carry one.** Same as
   the original — most USB-C cables under 60W are unmarked.
-- **usbeehive trusts the e-marker.** Counterfeit or mis-flashed cables can
-  lie about their capabilities.
+- **Cable trust is an evidence-based heuristic, not certification.**
+  `KnownGood` means available descriptor data is internally consistent, not
+  that copper gauge, thermal behavior, safety, or genuine USB-IF certification
+  was independently verified. `LikelyConstrained` describes a capability limit;
+  `Inconclusive` means insufficient evidence; `Suspicious` flags a mismatch or
+  malformed claim worth investigating, not proof of counterfeiting.
+- **A cable bottleneck may be uncertain when operating demand is unavailable.**
+  A reported UCSI sink request is compared with the cable rating; without it,
+  the selected source PDO or charger advertisement is only a capability ceiling
+  and the diagnosis is downgraded to medium/low confidence. A PDO is not a
+  wattmeter reading and does not prove a physical cable fault.
+- **False positives and negatives are expected.** A legitimate new VID may be
+  missing from the local database; unusual firmware can report incomplete or
+  contradictory data. A clone can copy a real VID and clean VDOs and escape
+  detection. Missing e-marker telemetry is common on UCSI systems and does not
+  prove a cable is unmarked. Low requested current alone does not prove poor
+  wire quality; battery/thermal policy, charger sharing, ports, adapters, and
+  contact problems can all constrain operation. Compare known-good hardware
+  and corroborate with a suitable meter before drawing safety conclusions.
 - **Vendor name lookup is not exhaustive.** Common vendors are recognized;
   others show the hex VID.
 

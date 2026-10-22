@@ -26,10 +26,10 @@
 //! assert_eq!(v.max_watts, 250);
 //! ```
 
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 /// The kind of USB-PD product reported in a `Discover Identity` ID Header.
-#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Serialize)]
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum ProductType {
     /// Field absent or reserved.
     #[default]
@@ -55,7 +55,7 @@ pub enum ProductType {
 /// Invariant: variants are declared in ascending speed order — the
 /// derived `Ord` relies on it (`Usb20 < Usb32Gen1 < … < Usb4Gen4`), so
 /// callers can compare a cable's rating against a device's capability.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 pub enum CableSpeed {
     /// USB 2.0 (480 Mbps), or no SuperSpeed support advertised.
     Usb20,
@@ -70,7 +70,7 @@ pub enum CableSpeed {
 }
 
 /// VBUS current rating advertised by a cable's e-marker.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum CableCurrent {
     /// USB Default — only nominal 5V @ 0.9A guaranteed.
     UsbDefault,
@@ -242,11 +242,21 @@ pub fn decode_ufp_vdo_highest_speed(vdo1: u32) -> Option<CableSpeed> {
 /// - Bit 3 — reserved in both passive and active cable VDOs.
 /// - Bits 7..8 — reserved in passive cable VDOs (used for SBU support in
 ///   active cables; only checked when `is_active` is `false`).
+/// - Bits 11..17 — reserved in passive cable VDOs.
 ///
 /// Caller passes the same `is_active` flag used with [`decode_cable_vdo`].
 pub fn cable_vdo_reserved_bits_set(vdo: u32, is_active: bool) -> bool {
-    let mask: u32 = if is_active { 0x0000_0008 } else { 0x0000_0188 };
+    let mask: u32 = if is_active { 0x0000_0008 } else { 0x0003_F988 };
     vdo & mask != 0
+}
+
+/// `true` when the raw ID Header VDO sets bits that USB-PD R3.x defines as
+/// reserved (specifically bits 16..20 and bit 22) — a trust signal that
+/// the e-marker microcode may be malformed or non-compliant.
+pub fn id_header_reserved_bits_set(vdo: u32) -> bool {
+    // Bits 16..20 (0x001F_0000) and bit 22 (0x0040_0000) are reserved across PD 3.x.
+    const ID_HEADER_RESERVED_MASK: u32 = 0x005F_0000;
+    vdo & ID_HEADER_RESERVED_MASK != 0
 }
 
 /// Decode a Cable VDO.
@@ -361,6 +371,19 @@ mod tests {
         assert!(cable_vdo_reserved_bits_set(0b1000, true));
         // Bit 7 is *not* reserved in active (SBU). Must not fire.
         assert!(!cable_vdo_reserved_bits_set(1 << 7, true));
+    }
+
+    #[test]
+    fn reserved_bits_id_header_detect() {
+        // Bit 16 is reserved.
+        assert!(id_header_reserved_bits_set(1 << 16));
+        // Bit 20 is reserved.
+        assert!(id_header_reserved_bits_set(1 << 20));
+        // Bit 22 is reserved.
+        assert!(id_header_reserved_bits_set(1 << 22));
+        // Clean ID header (passive cable, host capable, Apple VID 0x05AC).
+        let clean = (1u32 << 31) | (3 << 27) | 0x05AC;
+        assert!(!id_header_reserved_bits_set(clean));
     }
 
     #[test]

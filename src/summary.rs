@@ -17,7 +17,7 @@
 //! any unrecognized variant as `Unknown` / fall back to category-based
 //! behavior.
 
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 use crate::cable::CableInfo;
 use crate::diagnostic::ChargingDiagnostic;
@@ -29,7 +29,7 @@ use crate::usbclass;
 use crate::vendor;
 
 /// High-level grouping a [`DeviceSummary`] belongs to.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Category {
     /// Plain USB peripheral.
     UsbDevice,
@@ -40,7 +40,7 @@ pub enum Category {
 }
 
 /// Connection / power flow status surfaced to the UI layer.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Status {
     /// Type-C port with nothing attached.
     Empty,
@@ -59,7 +59,7 @@ pub enum Status {
 /// unrecognized value as [`Self::Unknown`]. When [`DeviceSummary::category`]
 /// is [`Category::TypeCPort`], `device_class` is always [`Self::Unknown`]
 /// — Type-C ports don't get a device class.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum DeviceClass {
     /// USB-IF HID keyboard.
     Keyboard,
@@ -111,7 +111,7 @@ pub enum DeviceClass {
 /// - `Sink` / `Source` — active contract in that direction
 /// - `DualRole` — port is dual-role-capable but no active contract
 /// - `Unknown` — port has no PD info (e.g. a plain USB-A device)
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum PowerRole {
     /// We are sourcing power out through this port.
     Source,
@@ -134,7 +134,7 @@ pub enum PowerRole {
 /// All wattages here are *negotiated ceilings*, not measurements — UCSI
 /// publishes the PD contract's operating point, never a metered flow.
 /// Render them as "up to N W".
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub struct PowerSummary {
     /// Power the sink requested from this port, in milliwatts. This is
     /// the RDO operating power (a declared draw ceiling) when the UCSI
@@ -165,7 +165,7 @@ impl Default for PowerSummary {
 }
 
 /// One renderable summary entry.
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct DeviceSummary {
     /// High-level grouping for color/iconography.
     pub category: Category,
@@ -964,6 +964,8 @@ impl DeviceSummary {
         // Active-transport flags from partner altmodes. SVIDs:
         //   0xFF01 — VESA DisplayPort
         //   0x8087 — Intel Thunderbolt 3
+        s.properties
+            .extend(crate::altmode::PortAltModes::for_port(port).to_properties());
         if let Some(partner) = &port.partner {
             let has_dp = partner.altmodes.iter().any(|a| a.svid == 0xFF01);
             let has_tb = partner.altmodes.iter().any(|a| a.svid == 0x8087);
@@ -977,6 +979,12 @@ impl DeviceSummary {
         }
 
         if let Some(c) = &s.cable {
+            // The Devices5 tuple is positional and fixed. Expose the structured
+            // trust grade through its additive string-pair property bag instead.
+            s.properties.push((
+                "cable.trust.level".into(),
+                format!("{:?}", c.trust.trust_level),
+            ));
             if let Some(speed) = c.speed {
                 s.properties.push((
                     "cable_speed".into(),
@@ -1193,6 +1201,29 @@ impl DeviceSummary {
                 requested_mw.unwrap_or(0),
                 requested_ma,
             );
+            if let Some(diagnostic) = &s.charging_diag {
+                // Preserve the stable Devices5 `charging_diag: (bsssb)` tuple;
+                // richer assessment fields are additive `properties: a(ss)`.
+                s.properties.extend([
+                    (
+                        "diagnostic.status".into(),
+                        format!("{:?}", diagnostic.status),
+                    ),
+                    (
+                        "diagnostic.root_cause".into(),
+                        format!("{:?}", diagnostic.root_cause),
+                    ),
+                    (
+                        "diagnostic.confidence".into(),
+                        format!("{:?}", diagnostic.confidence),
+                    ),
+                    (
+                        "diagnostic.recommended_action".into(),
+                        diagnostic.recommended_action.clone(),
+                    ),
+                    ("diagnostic.rule_id".into(), diagnostic.rule_id.to_owned()),
+                ]);
+            }
         }
 
         if power_role_str.eq_ignore_ascii_case("source") && sink_power_mw == 0 {
@@ -1851,11 +1882,13 @@ mod tests {
                         svid: 0xFF01,
                         mode: 1,
                         active: true,
+                        ..Default::default()
                     },
                     TypeCAltMode {
                         svid: 0x8087,
                         mode: 1,
                         active: false,
+                        ..Default::default()
                     },
                 ],
                 ..Default::default()
@@ -1863,6 +1896,10 @@ mod tests {
             ..Default::default()
         };
         let s = DeviceSummary::from_typec_port(&port, None, None, None);
+        assert!(s
+            .properties
+            .iter()
+            .any(|(k, v)| k == "altmode.dp" && v == "active"));
         assert!(s
             .properties
             .iter()
