@@ -8,6 +8,21 @@ use std::path::PathBuf;
 
 use serde::{Deserialize, Serialize};
 
+/// A single endpoint of a USB interface.
+#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, Eq)]
+pub struct UsbEndpoint {
+    /// Endpoint address (e.g. `0x81`).
+    pub address: u8,
+    /// Direction: `"in"` or `"out"`.
+    pub direction: String,
+    /// Transfer type: `"Bulk"`, `"Interrupt"`, `"Isochronous"`, `"Control"`.
+    pub ep_type: String,
+    /// Maximum packet size in bytes.
+    pub max_packet_size: u32,
+    /// Polling interval string (e.g. `"4ms"` or `"0ms"`).
+    pub interval: String,
+}
+
 /// A single interface descriptor of a USB device.
 #[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, Eq)]
 pub struct UsbInterface {
@@ -21,6 +36,12 @@ pub struct UsbInterface {
     pub protocol: u8,
     /// Driver name bound to this interface (`""` if none).
     pub driver: String,
+    /// Interface name from sysfs `interface` attribute (e.g. `"MTP"`, `"ADB Interface"`).
+    #[serde(default)]
+    pub name: String,
+    /// Endpoints belonging to this interface.
+    #[serde(default)]
+    pub endpoints: Vec<UsbEndpoint>,
 }
 
 /// Snapshot of a single USB device as observed in `/sys/bus/usb/devices/`.
@@ -132,6 +153,10 @@ pub struct UsbDevice {
     /// hub-internal port.
     #[serde(default)]
     pub port_connect_type: String,
+
+    /// Physical location of the connector/port (e.g. `"left upper (panel: top)"`).
+    #[serde(default)]
+    pub port_location: String,
 
     /// `maxchild` — number of downstream ports. Zero for non-hubs and when
     /// the attribute is unreadable.

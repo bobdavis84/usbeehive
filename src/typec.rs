@@ -179,6 +179,16 @@ pub struct TypeCPort {
     /// Attached cable, if any.
     pub cable: Option<TypeCCable>,
 
+    /// Physical location of the port connector (e.g. `"left upper (panel: top)"`).
+    #[serde(default)]
+    pub port_location: String,
+    /// Host AC mains power connected (e.g. from `/sys/class/power_supply/`).
+    #[serde(default)]
+    pub host_mains_online: Option<bool>,
+    /// Host system battery summary (e.g. `"Charging (99%, 11.9V, ~5.4W)"`).
+    #[serde(default)]
+    pub host_battery_summary: Option<String>,
+
     /// All regular files under the port sysfs directory.
     pub raw_attributes: BTreeMap<String, String>,
 }

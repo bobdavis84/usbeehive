@@ -92,7 +92,7 @@ pub use trust::{CableTrustLevel, TrustAssessment, TrustFlag, TrustSignal};
 pub use typec::{
     TypeCAltMode, TypeCCable, TypeCIdentity, TypeCPartner, TypeCPort, TypeCPowerSupply,
 };
-pub use usb::{LinkSpeed, UsbDevice, UsbInterface};
+pub use usb::{LinkSpeed, UsbDevice, UsbEndpoint, UsbInterface};
 
 #[cfg(feature = "sysfs")]
 pub use sysfs::{

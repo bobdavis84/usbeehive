@@ -1,0 +1,18 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=USBeehive
+GenericName=USB & Cable Inspector
+Comment=Inspect USB devices, USB-C cables, and charging diagnostics
+Exec=/home/bobdav/.local/bin/usbeehive-desktop
+Icon=usbeehive
+Terminal=false
+Categories=System;HardwareSettings;Utility;
+Keywords=usb;typec;cable;charging;hardware;sysfs;power;
+StartupNotify=true
+StartupWMClass=USBeehive
+Actions=DemoMode;
+
+[Desktop Action DemoMode]
+Name=Open in Browser Demo Mode
+Exec=sh -c "cd /home/bobdav/Antigravity_Projects/USBeehive/desktop && npm run dev"

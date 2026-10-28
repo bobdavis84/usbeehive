@@ -165,6 +165,43 @@ pub fn subdirs(path: impl AsRef<Path>) -> Vec<PathBuf> {
     out
 }
 
+/// Read ACPI physical location attributes from a `physical_location` subdirectory.
+pub fn read_physical_location(dir: impl AsRef<Path>) -> Option<String> {
+    let loc_dir = dir.as_ref().join("physical_location");
+    if !path_exists(&loc_dir) {
+        return None;
+    }
+    let panel = read_attr(loc_dir.join("panel")).filter(|s| s != "unknown" && !s.is_empty());
+    let horiz =
+        read_attr(loc_dir.join("horizontal_position")).filter(|s| s != "unknown" && !s.is_empty());
+    let vert =
+        read_attr(loc_dir.join("vertical_position")).filter(|s| s != "unknown" && !s.is_empty());
+    let dock = read_attr(loc_dir.join("dock")).filter(|s| s == "yes");
+    let lid = read_attr(loc_dir.join("lid")).filter(|s| s == "yes");
+
+    if panel.is_none() && horiz.is_none() && vert.is_none() && dock.is_none() && lid.is_none() {
+        return None;
+    }
+
+    let mut parts = Vec::new();
+    if let Some(h) = horiz {
+        parts.push(h);
+    }
+    if let Some(v) = vert {
+        parts.push(v);
+    }
+    if let Some(p) = panel {
+        parts.push(format!("(panel: {p})"));
+    }
+    if dock.is_some() {
+        parts.push("(dock)".into());
+    }
+    if lid.is_some() {
+        parts.push("(lid)".into());
+    }
+    Some(parts.join(" "))
+}
+
 /// Read every regular file in `dir` as a sysfs attribute, keyed by filename.
 /// Used for `--raw` rendering; silently skips unreadable entries.
 pub fn read_all_attrs(dir: impl AsRef<Path>) -> BTreeMap<String, String> {

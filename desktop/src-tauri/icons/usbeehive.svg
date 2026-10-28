@@ -1,0 +1,140 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Background squircle gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="50%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#020617"/>
+    </linearGradient>
+
+    <!-- Honeycomb golden gradient -->
+    <linearGradient id="honeyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fbbf24"/>
+      <stop offset="50%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#d97706"/>
+    </linearGradient>
+
+    <!-- USB/Tech gold gradient -->
+    <linearGradient id="goldShine" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a"/>
+      <stop offset="50%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#b45309"/>
+    </linearGradient>
+
+    <!-- Wing gradient -->
+    <linearGradient id="wingGradLeft" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#0284c7" stop-opacity="0.3"/>
+    </linearGradient>
+
+    <linearGradient id="wingGradRight" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#0284c7" stop-opacity="0.3"/>
+    </linearGradient>
+
+    <!-- Metallic connector gradient -->
+    <linearGradient id="metalGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#94a3b8"/>
+      <stop offset="50%" stop-color="#cbd5e1"/>
+      <stop offset="100%" stop-color="#64748b"/>
+    </linearGradient>
+
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000000" flood-opacity="0.6"/>
+    </filter>
+  </defs>
+
+  <!-- App Icon Base Squircle -->
+  <rect x="24" y="24" width="464" height="464" rx="104" fill="url(#bgGrad)" stroke="#334155" stroke-width="4" filter="url(#shadow)"/>
+
+  <!-- Honeycomb Hexagon Frame (Centered at 256, 256) -->
+  <polygon points="256,76 412,166 412,346 256,436 100,346 100,166" 
+           fill="none" stroke="url(#honeyGrad)" stroke-width="12" stroke-linejoin="round" opacity="0.4"/>
+  
+  <polygon points="256,92 398,174 398,338 256,420 114,338 114,174" 
+           fill="#1e1e2e" fill-opacity="0.6" stroke="#f59e0b" stroke-width="3" stroke-linejoin="round" opacity="0.3"/>
+
+  <!-- Glowing Bee Wings (Cyan/Blue tech circuit wings) -->
+  <g filter="url(#shadow)">
+    <!-- Left Wing -->
+    <path d="M 230 200 C 130 110, 80 180, 110 260 C 130 310, 200 280, 230 240 Z" 
+          fill="url(#wingGradLeft)" stroke="#38bdf8" stroke-width="3.5" opacity="0.85"/>
+    <!-- Wing circuitry -->
+    <path d="M 140 240 Q 180 230 230 220" stroke="#bae6fd" stroke-width="2" fill="none" opacity="0.7"/>
+    <path d="M 125 210 Q 170 190 220 205" stroke="#bae6fd" stroke-width="2" fill="none" opacity="0.7"/>
+    
+    <!-- Right Wing -->
+    <path d="M 282 200 C 382 110, 432 180, 402 260 C 382 310, 312 280, 282 240 Z" 
+          fill="url(#wingGradRight)" stroke="#38bdf8" stroke-width="3.5" opacity="0.85"/>
+    <!-- Wing circuitry -->
+    <path d="M 372 240 Q 332 230 282 220" stroke="#bae6fd" stroke-width="2" fill="none" opacity="0.7"/>
+    <path d="M 387 210 Q 342 190 292 205" stroke="#bae6fd" stroke-width="2" fill="none" opacity="0.7"/>
+  </g>
+
+  <!-- Antennae / Data Traces -->
+  <g stroke="url(#goldShine)" stroke-width="5" stroke-linecap="round" fill="none">
+    <!-- Left Antenna (branches to a square USB terminal node) -->
+    <path d="M 236 140 C 220 95, 175 105, 160 115"/>
+    <rect x="148" y="105" width="18" height="18" rx="3" fill="#fbbf24" stroke="#f59e0b" stroke-width="3"/>
+    
+    <!-- Right Antenna (branches to a circular USB terminal node) -->
+    <path d="M 276 140 C 292 95, 337 105, 352 115"/>
+    <circle cx="360" cy="115" r="9" fill="#fbbf24" stroke="#f59e0b" stroke-width="3"/>
+  </g>
+
+  <!-- Bee Body (Center) with USB & Honeycomb elements -->
+  <!-- Top Head: USB-C Connector Shell -->
+  <g id="bee-head">
+    <!-- Type-C metal plug outer -->
+    <rect x="220" y="126" width="72" height="42" rx="14" fill="url(#metalGrad)" stroke="#cbd5e1" stroke-width="3" filter="url(#shadow)"/>
+    <!-- Type-C center tab / slot -->
+    <rect x="232" y="141" width="48" height="12" rx="6" fill="#0f172a"/>
+    <!-- Gold pins inside slot -->
+    <line x1="242" y1="147" x2="248" y2="147" stroke="#fbbf24" stroke-width="3" stroke-linecap="round"/>
+    <line x1="253" y1="147" x2="259" y2="147" stroke="#fbbf24" stroke-width="3" stroke-linecap="round"/>
+    <line x1="264" y1="147" x2="270" y2="147" stroke="#fbbf24" stroke-width="3" stroke-linecap="round"/>
+  </g>
+
+  <!-- Thorax & Abdomen (Bee Body) -->
+  <g id="bee-abdomen" filter="url(#shadow)">
+    <!-- Base body shape -->
+    <path d="M 206 170 
+             C 180 200, 180 270, 214 340 
+             C 230 370, 246 395, 256 410 
+             C 266 395, 282 370, 298 340 
+             C 332 270, 332 200, 306 170 Z" 
+          fill="#1e293b" stroke="#f59e0b" stroke-width="5"/>
+
+    <!-- Bee Gold Stripes (Glowing honey stripes) -->
+    <!-- Stripe 1 (top thorax) -->
+    <path d="M 197 205 C 235 220, 277 220, 315 205 L 320 235 C 280 252, 232 252, 192 235 Z" 
+          fill="url(#honeyGrad)"/>
+
+    <!-- Stripe 2 (middle) -->
+    <path d="M 194 265 C 235 282, 277 282, 318 265 L 314 295 C 278 312, 234 312, 198 295 Z" 
+          fill="url(#honeyGrad)"/>
+
+    <!-- Stripe 3 (lower) -->
+    <path d="M 212 325 C 240 338, 272 338, 300 325 L 288 355 C 268 365, 244 365, 224 355 Z" 
+          fill="url(#honeyGrad)"/>
+
+    <!-- Bee Stinger / Cable connector prong -->
+    <path d="M 252 410 L 256 432 L 260 410 Z" fill="#fbbf24" stroke="#d97706" stroke-width="2"/>
+
+    <!-- Center USB Trident symbol on the bee's back -->
+    <g stroke="#ffffff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none">
+      <!-- Main trunk -->
+      <line x1="256" y1="210" x2="256" y2="305"/>
+      <!-- Top arrow / diamond -->
+      <polygon points="256,192 263,205 256,201 249,205" fill="#ffffff" stroke="none"/>
+      <!-- Left branch with square -->
+      <path d="M 256 255 C 238 255, 234 240, 234 230"/>
+      <rect x="227" y="219" width="14" height="14" rx="2" fill="#ffffff" stroke="none"/>
+      <!-- Right branch with circle -->
+      <path d="M 256 265 C 274 265, 278 250, 278 240"/>
+      <circle cx="278" cy="232" r="7" fill="#ffffff" stroke="none"/>
+      <!-- Bottom circle -->
+      <circle cx="256" cy="312" r="6" fill="#ffffff" stroke="none"/>
+    </g>
+  </g>
+</svg>

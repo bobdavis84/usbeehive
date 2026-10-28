@@ -58,12 +58,37 @@ fn read_interfaces(dev_path: &Path) -> Vec<UsbInterface> {
             .rsplit_once('.')
             .and_then(|(_, n)| n.parse().ok())
             .unwrap_or(0);
+        let if_name = reader::read_attr(if_path.join("interface")).unwrap_or_default();
+        let mut endpoints = Vec::new();
+        for sub in reader::subdirs(&if_path) {
+            if let Some(sub_name) = sub.file_name().map(|n| n.to_string_lossy()) {
+                if sub_name.starts_with("ep_") {
+                    let addr = reader::read_hex(sub.join("bEndpointAddress")).unwrap_or(0) as u8;
+                    let direction = reader::read_attr(sub.join("direction")).unwrap_or_default();
+                    let ep_type = reader::read_attr(sub.join("type")).unwrap_or_default();
+                    let max_packet_size = reader::read_hex(sub.join("wMaxPacketSize")).unwrap_or(0);
+                    let interval = reader::read_attr(sub.join("interval"))
+                        .or_else(|| reader::read_attr(sub.join("bInterval")))
+                        .unwrap_or_default();
+                    endpoints.push(crate::usb::UsbEndpoint {
+                        address: addr,
+                        direction,
+                        ep_type,
+                        max_packet_size,
+                        interval,
+                    });
+                }
+            }
+        }
+        endpoints.sort_by_key(|e| e.address);
         out.push(UsbInterface {
             number,
             class_code: class as u8,
             sub_class: reader::read_hex(if_path.join("bInterfaceSubClass")).unwrap_or(0) as u8,
             protocol: reader::read_hex(if_path.join("bInterfaceProtocol")).unwrap_or(0) as u8,
             driver,
+            name: if_name,
+            endpoints,
         });
     }
     out.sort_by_key(|i| i.number);
@@ -84,6 +109,7 @@ struct PortView {
     peer_id: String,
     peer_state: String,
     connect_type: String,
+    location: String,
 }
 
 fn link_basename(link: &Path) -> String {
@@ -100,12 +126,22 @@ fn link_basename(link: &Path) -> String {
 /// device directory at open() time, which is exactly what we want, and it
 /// keeps the injectable-root design working for fixtures.
 fn read_port_view(dev_path: &Path) -> PortView {
-    let mut view = PortView::default();
+    let location = reader::read_physical_location(dev_path).unwrap_or_default();
     let Ok(port_link) = fs::read_link(dev_path.join("port")) else {
-        return view;
+        return PortView {
+            location,
+            ..Default::default()
+        };
     };
-    view.id = link_basename(&port_link);
+    let mut view = PortView {
+        id: link_basename(&port_link),
+        location,
+        ..Default::default()
+    };
     let port_dir = dev_path.join(&port_link);
+    if view.location.is_empty() {
+        view.location = reader::read_physical_location(&port_dir).unwrap_or_default();
+    }
 
     // The kernel writes the literal "unknown" on every hub-internal port.
     // Emitting that would put a useless value on most devices; absence
@@ -231,6 +267,7 @@ fn from_sysfs(path: &Path, name: &str) -> Option<UsbDevice> {
         port_peer_id: port.peer_id,
         port_peer_state: port.peer_state,
         port_connect_type: port.connect_type,
+        port_location: port.location,
         max_child: if is_hub {
             reader::read_int(path.join("maxchild")).unwrap_or(0).max(0) as u32
         } else {

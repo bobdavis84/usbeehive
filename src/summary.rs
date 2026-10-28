@@ -651,6 +651,47 @@ impl DeviceSummary {
         }
         if dev.max_power_ma > 0 {
             properties.push(("usb_max_power_ma".into(), dev.max_power_ma.to_string()));
+            let w = (dev.max_power_ma as f64 * 5.0) / 1000.0;
+            properties.push((
+                "usb.bus_power_allocated".into(),
+                format!("{} mA (up to {:.1} W)", dev.max_power_ma, w),
+            ));
+        }
+        let power_source = if (dev.bm_attributes & 0x40) != 0 {
+            "Self-powered"
+        } else {
+            "Bus-powered"
+        };
+        properties.push(("usb.power_source".into(), power_source.into()));
+        if !dev.port_location.is_empty() {
+            properties.push(("port.location".into(), dev.port_location.clone()));
+        }
+
+        for iface in &dev.interfaces {
+            let mut desc = format!(
+                "Interface {}: {}",
+                iface.number,
+                usbclass::class_name(iface.class_code)
+            );
+            if !iface.name.is_empty() {
+                desc.push_str(&format!(" ({})", iface.name));
+            }
+            if !iface.driver.is_empty() {
+                desc.push_str(&format!(" [{}]", iface.driver));
+            }
+            if !iface.endpoints.is_empty() {
+                let ep_str = iface
+                    .endpoints
+                    .iter()
+                    .map(|e| {
+                        let dir = if e.direction == "in" { "In" } else { "Out" };
+                        format!("{} {} ({}B)", e.ep_type, dir, e.max_packet_size)
+                    })
+                    .collect::<Vec<_>>()
+                    .join(", ");
+                desc.push_str(&format!(" — EPs: {ep_str}"));
+            }
+            properties.push((format!("usb.interface_{}", iface.number), desc));
         }
 
         // Transport flags — only emit booleans that fire. USB devices can't
@@ -930,6 +971,17 @@ impl DeviceSummary {
         if !port.power_op_mode.is_empty() {
             s.properties
                 .push(("power_mode".into(), port.power_op_mode.clone()));
+        }
+        if !port.port_location.is_empty() {
+            s.properties
+                .push(("port.location".into(), port.port_location.clone()));
+        }
+        if let Some(mains) = port.host_mains_online {
+            s.properties
+                .push(("host.mains_online".into(), mains.to_string()));
+        }
+        if let Some(bat) = &port.host_battery_summary {
+            s.properties.push(("host.battery".into(), bat.clone()));
         }
 
         // Cross-reference to the correlated USB device using the stable-id

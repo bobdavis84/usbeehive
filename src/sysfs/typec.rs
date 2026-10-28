@@ -282,10 +282,15 @@ fn from_sysfs(path: &Path, name: &str, psy_root: &Path) -> Option<TypeCPort> {
     }
     let port_number = trail.parse::<i32>().unwrap_or(-1);
 
+    let port_location = reader::read_physical_location(path).unwrap_or_default();
+
     let mut port = TypeCPort {
         sysfs_path: path.to_path_buf(),
         port_name: name.to_string(),
         port_number,
+        port_location,
+        host_mains_online: None,
+        host_battery_summary: None,
         data_role: reader::read_attr(path.join("data_role")).unwrap_or_default(),
         power_role: reader::read_attr(path.join("power_role")).unwrap_or_default(),
         port_type: reader::read_attr(path.join("port_type")).unwrap_or_default(),
@@ -324,10 +329,58 @@ fn from_sysfs(path: &Path, name: &str, psy_root: &Path) -> Option<TypeCPort> {
     Some(port)
 }
 
+fn read_host_power_info(psy_root: &Path) -> (Option<bool>, Option<String>) {
+    if !reader::path_exists(psy_root) {
+        return (None, None);
+    }
+    let mut mains_online = None;
+    let mut battery_summary = None;
+
+    for dir in reader::subdirs(psy_root) {
+        let p_type = reader::read_attr(dir.join("type")).unwrap_or_default();
+        if p_type.eq_ignore_ascii_case("Mains") {
+            let online = reader::read_int(dir.join("online")).map(|v| v != 0);
+            if online.is_some() {
+                mains_online = online;
+            }
+        } else if p_type.eq_ignore_ascii_case("Battery") && battery_summary.is_none() {
+            let present = reader::read_int(dir.join("present")).unwrap_or(1) != 0;
+            if !present {
+                continue;
+            }
+            let status = reader::read_attr(dir.join("status")).unwrap_or_else(|| "Unknown".into());
+            let capacity = reader::read_int(dir.join("capacity")).unwrap_or(0);
+            let v_uv = reader::read_int(dir.join("voltage_now")).unwrap_or(0);
+            let i_ua = reader::read_int(dir.join("current_now")).unwrap_or(0);
+            let p_uw = reader::read_int(dir.join("power_now")).unwrap_or(0);
+
+            let mut details = format!("{status} ({capacity}%");
+            if v_uv > 0 {
+                let v_volts = v_uv as f64 / 1_000_000.0;
+                details.push_str(&format!(", {v_volts:.1}V"));
+            }
+            let power_watts = if p_uw > 0 {
+                Some(p_uw as f64 / 1_000_000.0)
+            } else if v_uv > 0 && i_ua > 0 {
+                Some((v_uv as f64 * i_ua as f64) / 1_000_000_000_000.0)
+            } else {
+                None
+            };
+            if let Some(w) = power_watts {
+                details.push_str(&format!(", ~{w:.1}W"));
+            }
+            details.push(')');
+            battery_summary = Some(details);
+        }
+    }
+    (mains_online, battery_summary)
+}
+
 pub(crate) fn enumerate_in(base: &Path, psy_root: &Path) -> Vec<TypeCPort> {
     if !reader::path_exists(base) {
         return Vec::new();
     }
+    let (mains_online, battery_summary) = read_host_power_info(psy_root);
     let mut entries: Vec<(PathBuf, String)> = reader::subdirs(base)
         .into_iter()
         .filter_map(|p| {
@@ -336,10 +389,15 @@ pub(crate) fn enumerate_in(base: &Path, psy_root: &Path) -> Vec<TypeCPort> {
         })
         .collect();
     entries.sort_by(|a, b| a.1.cmp(&b.1));
-    entries
+    let mut ports: Vec<TypeCPort> = entries
         .iter()
         .filter_map(|(p, n)| from_sysfs(p, n, psy_root))
-        .collect()
+        .collect();
+    for port in &mut ports {
+        port.host_mains_online = mains_online;
+        port.host_battery_summary = battery_summary.clone();
+    }
+    ports
 }
 
 #[cfg(test)]

@@ -401,13 +401,24 @@ pub fn build_summaries(
         // Resolve the correlated USB device via the partner's USB child
         // directory (e.g. `2-2`) — the kernel's canonical port↔USB-device
         // linkage, same shape as the `usb_power_delivery` symlink pairing.
-        // Chargers enumerate no USB device, so `usb_name` is empty there
-        // and the lookup is a no-op.
-        let usb_match = tc
-            .partner
-            .as_ref()
-            .filter(|pa| !pa.usb_name.is_empty())
-            .and_then(|pa| usb.iter().find(|d| d.bus_port == pa.usb_name));
+        // If empty (e.g. UCSI without ACPI DT connector mapping), fall back to
+        // matching by physical port location.
+        let usb_match = tc.partner.as_ref().and_then(|pa| {
+            if !pa.usb_name.is_empty() {
+                usb.iter().find(|d| d.bus_port == pa.usb_name)
+            } else if !tc.port_location.is_empty() {
+                usb.iter().find(|d| {
+                    !d.is_root_hub
+                        && !d.is_hub
+                        && d.removable != "fixed"
+                        && d.port_connect_type != "hardwired"
+                        && !d.port_location.is_empty()
+                        && d.port_location == tc.port_location
+                })
+            } else {
+                None
+            }
+        });
         let cable = tc.cable.as_ref().map(CableInfo::from_typec_cable);
         let summary = DeviceSummary::from_typec_port(tc, pd_match, cable, usb_match);
         out.push(summary);
